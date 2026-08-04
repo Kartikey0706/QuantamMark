@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard — QuantumMark</title>
+    <meta name="description" content="QuantumMark Dashboard — Quantum-Secured Digital Watermarking Platform." />
+    <meta name="robots" content="noindex" />
+
+    <!-- Google Fonts: Outfit (same as landing page) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Lucide Icons (same CDN as landing page) -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+    <!-- Dashboard stylesheet -->
+    <link rel="stylesheet" href="./css/dashboard.css" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+  </head>
+
+  <body>
+
+    <!-- ============================================================
+         SIDEBAR — Fixed glass navigation panel
+    ============================================================ -->
+    <aside class="sidebar" id="sidebar" aria-label="Sidebar navigation">
+
+      <!-- Sidebar header / brand -->
+      <div class="sidebar-header">
+        <a href="./index.html" class="sidebar-logo" aria-label="Back to QuantumMark home">
+          <span class="logo-q">Q</span>uantumMark
+        </a>
+        <div class="sidebar-badge">Research</div>
+      </div>
+
+      <!-- Primary navigation -->
+      <nav class="sidebar-nav" aria-label="Dashboard navigation">
+        <ul class="sidebar-nav-list" role="list">
+
+          <!-- Dashboard (active) -->
+          <li>
+            <a href="#" class="sidebar-link active" aria-current="page">
+              <span class="sidebar-link-icon">
+                <i data-lucide="layout-dashboard" aria-hidden="true"></i>
+              </span>
+              <span class="sidebar-link-label">Dashboard</span>
+            </a>
+          </li>
+
+          <!-- Protect Image -->
+          <li>
+            <a href="#" class="sidebar-link">
+              <span class="sidebar-link-icon">
+                <i data-lucide="shield-plus" aria-hidden="true"></i>
+              </span>
+              <span class="sidebar-link-label">Protect Image</span>
+            </a>
+          </li>
+
+          <!-- Verify Image -->
+          <li>
+            <a href="#" class="sidebar-link">
+              <span class="sidebar-link-icon">
+                <i data-lucide="scan-search" aria-hidden="true"></i>
+              </span>
+              <span class="sidebar-link-label">Verify Image</span>
+            </a>
+          </li>
+
+          <!-- Attack Lab -->
+          <li>
+            <a href="#" class="sidebar-link">
+              <span class="sidebar-link-icon">
+                <i data-lucide="flask-conical" aria-hidden="true"></i>
+              </span>
+              <span class="sidebar-link-label">Attack Lab</span>
+            </a>
+          </li>
+
+          <!-- Certificates -->
+          <li>
+            <a href="#" class="sidebar-link">
+              <span class="sidebar-link-icon">
+                <i data-lucide="file-badge-2" aria-hidden="true"></i>
+              </span>
+              <span class="sidebar-link-label">Certificates</span>
+            </a>
+          </li>
+
+          <!-- About -->
+          <li>
+            <a href="#" class="sidebar-link">
+              <span class="sidebar-link-icon">
+                <i data-lucide="info" aria-hidden="true"></i>
+              </span>
+              <span class="sidebar-link-label">About</span>
+            </a>
+          </li>
+
+        </ul>
+      </nav>
+
+      <!-- Sidebar footer — version chip -->
+      <div class="sidebar-footer">
+        <div class="sidebar-version">
+          <i data-lucide="atom" aria-hidden="true"></i>
+          <span>QuantumMark v0.1.0</span>
+        </div>
+        <a href="./index.html" class="sidebar-back-link">
+          <i data-lucide="arrow-left" aria-hidden="true"></i>
+          Back to Landing
+        </a>
+      </div>
+
+    </aside>
+
+
+    <!-- ============================================================
+         MAIN WRAPPER — everything to the right of the sidebar
+    ============================================================ -->
+    <div class="main-wrapper" id="mainWrapper">
+
+      <!-- --------------------------------------------------------
+           TOP NAVIGATION BAR — sticky within the main wrapper
+      -------------------------------------------------------- -->
+      <header class="topnav" id="topnav" aria-label="Top navigation">
+        <div class="topnav-inner">
+
+          <!-- Left: mobile hamburger + page title -->
+          <div class="topnav-left">
+            <!-- Hamburger (mobile only) -->
+            <button
+              class="topnav-toggle"
+              id="sidebarToggle"
+              aria-label="Toggle sidebar"
+              aria-expanded="false"
+              aria-controls="sidebar"
+            >
+              <i data-lucide="menu" aria-hidden="true"></i>
+            </button>
+
+            <!-- Breadcrumb -->
+            <div class="topnav-breadcrumb" aria-label="Breadcrumb">
+              <a href="./index.html" class="breadcrumb-home">
+                <i data-lucide="home" aria-hidden="true"></i>
+              </a>
+              <i data-lucide="chevron-right" class="breadcrumb-sep" aria-hidden="true"></i>
+              <span class="breadcrumb-current">Dashboard</span>
+            </div>
+          </div>
+
+          <!-- Right: status chip + action button -->
+          <div class="topnav-right">
+            <!-- System status indicator -->
+            <div class="status-chip" aria-label="System status: Ready">
+              <span class="status-dot" aria-hidden="true"></span>
+              System Ready
+            </div>
+
+            <!-- New session CTA -->
+            <button class="btn btn-primary btn-sm" type="button">
+              <i data-lucide="plus" aria-hidden="true"></i>
+              New Session
+            </button>
+          </div>
+
+        </div>
+      </header>
+
+
+      <!-- --------------------------------------------------------
+           PAGE CONTENT — scrollable main area
+      -------------------------------------------------------- -->
+      <main class="page-content" id="pageContent" aria-label="Dashboard content">
+        <div class="content-container">
+
+
+          <!-- ====================================================
+               1. WELCOME CARD
+          ==================================================== -->
+          <section class="dash-card welcome-card reveal" aria-label="Welcome">
+            <div class="welcome-left">
+              <div class="welcome-icon-wrap" aria-hidden="true">
+                <i data-lucide="shield-check"></i>
+              </div>
+              <div class="welcome-copy">
+                <h1 class="welcome-heading">Welcome to QuantumMark</h1>
+                <p class="welcome-subtitle">
+                  Secure Digital Watermarking Research Platform
+                </p>
+              </div>
+            </div>
+            <div class="welcome-actions">
+              <a href="#upload" class="btn btn-primary">
+                <i data-lucide="upload-cloud" aria-hidden="true"></i>
+                Upload Image
+              </a>
+              <a href="#analytics" class="btn btn-ghost">
+                <i data-lucide="bar-chart-2" aria-hidden="true"></i>
+                View Analytics
+              </a>
+            </div>
+          </section>
+
+
+          <!-- ====================================================
+               2. UPLOAD IMAGE CARD
+          ==================================================== -->
+          <section class="dash-card upload-card reveal" id="upload" aria-label="Upload image">
+
+            <div class="card-header">
+              <div class="card-title-row">
+                <div class="card-icon-wrap">
+                  <i data-lucide="upload-cloud" aria-hidden="true"></i>
+                </div>
+                <div>
+                  <h2 class="card-title">Upload Image</h2>
+                  <p class="card-subtitle">Select or drag a file to begin watermarking</p>
+                </div>
+              </div>
+              <div class="card-badge">
+                <i data-lucide="shield" aria-hidden="true"></i>
+                Secure Upload
+              </div>
+            </div>
+
+            <!-- Drag & drop zone -->
+            <div class="dropzone" role="region" aria-label="Drag and drop upload area" id="dropzone">
+              <div class="dropzone-inner">
+
+                <!-- Animated upload icon -->
+                <div class="dropzone-icon" aria-hidden="true">
+                  <div class="dropzone-icon-ring dropzone-icon-ring--1"></div>
+                  <div class="dropzone-icon-ring dropzone-icon-ring--2"></div>
+                  <div class="dropzone-icon-core">
+                    <i data-lucide="image-plus"></i>
+                  </div>
+                </div>
+
+                <div class="dropzone-copy">
+                  <p class="dropzone-heading">Drop your image here</p>
+                  <p class="dropzone-sub">or click to browse from your device</p>
+                </div>
+
+                <div class="dropzone-formats">
+                  <span class="format-chip">PNG</span>
+                  <span class="format-chip">JPG</span>
+                  <span class="format-chip">JPEG</span>
+                </div>
+
+                <p class="dropzone-note">
+                  <i data-lucide="lock" aria-hidden="true"></i>
+                  PNG / JPG / JPEG only &nbsp;·&nbsp; Max 20 MB &nbsp;·&nbsp; Files are processed locally and never stored
+                </p>
+
+                <input type="file" id="imageInput" accept=".png,.jpg,.jpeg" hidden aria-hidden="true" />
+
+                <div class="dropzone-preview" id="dropzonePreview" hidden aria-live="polite">
+                  <div class="preview-image-wrap">
+                    <img id="previewImage" alt="Selected image preview" />
+                  </div>
+                  <div class="preview-meta">
+                    <div class="preview-meta-row">
+                      <span>File Name</span>
+                      <span id="previewName">-</span>
+                    </div>
+                    <div class="preview-meta-row">
+                      <span>Resolution</span>
+                      <span id="previewResolution">-</span>
+                    </div>
+                    <div class="preview-meta-row">
+                      <span>Size</span>
+                      <span id="previewSize">-</span>
+                    </div>
+                  </div>
+                  <div class="preview-actions">
+                    <button type="button" class="btn btn-ghost btn-sm" id="removeImageBtn">
+                      <i data-lucide="x-circle" aria-hidden="true"></i>
+                      Remove Image
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Upload configuration row (UI only) -->
+            <div class="upload-config">
+              <div class="config-option">
+                <label class="config-label" for="embedMode">Embed Mode</label>
+                <div class="config-select-wrap">
+                  <select class="config-select" id="embedMode" aria-label="Embed mode">
+                    <option>DWT-SVD (Recommended)</option>
+                    <option>DCT Frequency</option>
+                    <option>Spatial LSB</option>
+                  </select>
+                  <i data-lucide="chevron-down" class="select-arrow" aria-hidden="true"></i>
+                </div>
+              </div>
+              <div class="config-option">
+                <label class="config-label" for="strength">Embed Strength</label>
+                <div class="config-select-wrap">
+                  <select class="config-select" id="strength" aria-label="Embed strength">
+                    <option>Medium (α = 0.1)</option>
+                    <option>Low (α = 0.05)</option>
+                    <option>High (α = 0.2)</option>
+                  </select>
+                  <i data-lucide="chevron-down" class="select-arrow" aria-hidden="true"></i>
+                </div>
+              </div>
+              <button class="btn btn-primary" type="button" id="continueBtn" disabled aria-disabled="true">
+                <i data-lucide="arrow-right" aria-hidden="true"></i>
+                Continue
+              </button>
+            </div>
+
+            <!-- Protect Image Workspace (hidden until user opens it) -->
+            <section class="dash-card protect-workspace reveal" id="protectWorkspace" aria-label="Protect Image Workspace" hidden>
+              <div class="protect-grid">
+
+                <!-- LEFT PANEL -->
+                <div class="pw-left">
+                  <h3 class="pw-panel-title">Original Image</h3>
+                  <div class="pw-card">
+                    <div class="pw-preview-wrap">
+                      <img id="origPreviewLarge" alt="Original image preview" />
+                    </div>
+                    <div class="pw-subcard">
+                      <label class="pw-sublabel">Watermark Image</label>
+                      <div class="small-dropzone" id="watermarkDrop" role="region" aria-label="Upload watermark image">
+                        <div class="small-drop-inner">
+                          <i data-lucide="image"></i>
+                          <div class="small-drop-copy">
+                            <div class="small-drop-heading">Drop watermark here</div>
+                            <div class="small-drop-sub">or click to browse</div>
+                          </div>
+                        </div>
+                        <input type="file" id="watermarkInput" accept=".png,.jpg,.jpeg" hidden />
+                      </div>
+                      <div class="pw-watermark-preview" id="watermarkPreview" hidden>
+                        <img id="watermarkPreviewImg" alt="Watermark preview" />
+                        <div class="pw-watermark-meta">
+                          <div><strong id="wmName">-</strong></div>
+                          <div id="wmSize">-</div>
+                        </div>
+                        <div class="pw-watermark-actions">
+                          <button class="btn btn-ghost btn-sm" id="removeWmBtn"><i data-lucide="x-circle"></i> Remove</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- CENTER PANEL -->
+                <div class="pw-center">
+                  <h3 class="pw-panel-title">Protection Settings</h3>
+                  <div class="pw-card">
+                    <div class="pw-field">
+                      <label class="pw-label">Watermark Type</label>
+                      <div class="pw-options">
+                        <label><input type="radio" name="wmType" value="text" /> Text</label>
+                        <label><input type="radio" name="wmType" value="image" checked /> Image</label>
+                      </div>
+                    </div>
+
+                    <div class="pw-field">
+                      <label class="pw-label">Embedding Method</label>
+                      <div class="pw-options">
+                        <label class="pw-method"><input type="radio" name="embedMethod" value="lsb" checked /> LSB</label>
+                        <label class="pw-method disabled"><input type="radio" name="embedMethod" value="dct" disabled /> DCT <span class="coming">Coming Soon</span></label>
+                        <label class="pw-method disabled"><input type="radio" name="embedMethod" value="dwt" disabled /> DWT <span class="coming">Coming Soon</span></label>
+                      </div>
+                    </div>
+
+                    <div class="pw-field">
+                      <label class="pw-label">Watermark Strength</label>
+                      <div class="pw-slider-wrap">
+                        <input type="range" id="wmStrength" min="0" max="100" value="50" />
+                        <div class="wm-strength-labels"><span>Low</span><span>Medium</span><span>High</span></div>
+                      </div>
+                    </div>
+
+                    <div class="pw-field">
+                      <label class="pw-label">Quantum Key</label>
+                      <div class="pw-quantum">
+                        <input type="text" id="quantumKey" readonly />
+                        <button class="btn btn-ghost btn-sm" id="genQuantumBtn">Generate Quantum Key</button>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+                <!-- RIGHT PANEL -->
+                <div class="pw-right">
+                  <h3 class="pw-panel-title">Security Information</h3>
+                  <div class="pw-card pw-metrics">
+                    <div class="metric-small">
+                      <div class="metric-small-label">PSNR</div>
+                      <div class="metric-small-value" id="mPsnr">--</div>
+                    </div>
+                    <div class="metric-small">
+                      <div class="metric-small-label">SSIM</div>
+                      <div class="metric-small-value" id="mSsim">--</div>
+                    </div>
+                    <div class="metric-small">
+                      <div class="metric-small-label">Entropy</div>
+                      <div class="metric-small-value" id="mEntropy">--</div>
+                    </div>
+                    <div class="metric-small">
+                      <div class="metric-small-label">Embedding Time</div>
+                      <div class="metric-small-value" id="mEmbeddingTime">--</div>
+                    </div>
+                    <div class="metric-small">
+                      <div class="metric-small-label">Key Length</div>
+                      <div class="metric-small-value" id="mKeyLength">--</div>
+                    </div>
+                    <div class="metric-small">
+                      <div class="metric-small-label">Security Level</div>
+                      <div class="metric-small-value" id="mSecurity">Waiting...</div>
+                    </div>
+                  </div>
+
+                  <div class="pw-protected-preview" id="pwProtected" hidden>
+                    <h4 class="pw-panel-title">Protected Image</h4>
+                    <div class="pw-preview-wrap">
+                      <img id="protectedPreviewLarge" alt="Protected image preview" />
+                    </div>
+                  </div>
+
+                  <div class="pw-card pw-output">
+                    <h4 class="pw-output-title">Output</h4>
+                    <div class="pw-output-row"><span>Protected Image</span><span id="outProtected">Not generated</span></div>
+                    <div class="pw-output-row"><span>Certificate</span><span id="outCert">Pending</span></div>
+                    <div class="pw-output-row"><span>QR Verification</span><span id="outQr">Optional</span></div>
+                    <div class="pw-output-actions" style="margin-top:12px; display:flex; gap:8px;">
+                      <button class="btn btn-primary" id="genCertBtn" disabled>Generate Certificate</button>
+                      <button class="btn btn-ghost" id="qrBtn" disabled>QR Verification</button>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Bottom action bar -->
+              <div class="pw-action-bar">
+                <div class="pw-action-left">
+                  <button class="btn btn-primary" id="genBtn" disabled>Generate Watermark</button>
+                  <button class="btn btn-ghost" id="resetBtn">Reset</button>
+                </div>
+                <div class="pw-action-right">
+                  <button class="btn btn-primary" id="downloadBtn" disabled>Download Protected Image</button>
+                </div>
+              </div>
+
+              <!-- Processing overlay (inside workspace) -->
+              <div class="pw-overlay" id="pwOverlay" hidden aria-hidden="true">
+                <div class="pw-overlay-card">
+                  <h4>Processing</h4>
+                  <div class="pw-steps" id="pwSteps">
+                    <!-- Steps injected by JS -->
+                  </div>
+                  <div class="pw-overlay-note" id="pwOverlayNote">Initializing…</div>
+                </div>
+              </div>
+
+              <!-- Success badge -->
+              <div class="pw-success" id="pwSuccess" hidden>Watermark Successfully Embedded</div>
+
+            </section>
+
+            <!-- Processing History Card -->
+            <section class="dash-card processing-history reveal" id="processingHistory" aria-label="Processing history">
+              <div class="card-header">
+                <div class="card-title-row">
+                  <div class="card-icon-wrap">
+                    <i data-lucide="clock" aria-hidden="true"></i>
+                  </div>
+                  <div>
+                    <h2 class="card-title">Processing History</h2>
+                    <p class="card-subtitle">Last 5 processed sessions</p>
+                  </div>
+                </div>
+              </div>
+              <div class="history-list" id="historyList">
+                <div class="history-empty">No processing history yet</div>
+              </div>
+            </section>
+
+          </section>
+
+
+          <!-- ====================================================
+               3. SECURITY ANALYTICS CARD
+          ==================================================== -->
+          <section class="dash-card analytics-card reveal" id="analytics" aria-label="Security analytics">
+
+            <div class="card-header">
+              <div class="card-title-row">
+                <div class="card-icon-wrap card-icon-wrap--cyan">
+                  <i data-lucide="bar-chart-2" aria-hidden="true"></i>
+                </div>
+                <div>
+                  <h2 class="card-title">Security Analytics</h2>
+                  <p class="card-subtitle">Quality and integrity metrics for the last processed image</p>
+                </div>
+              </div>
+              <div class="card-badge card-badge--blue">
+                <i data-lucide="clock" aria-hidden="true"></i>
+                Sample Data
+              </div>
+            </div>
+
+            <!-- Metric cards grid -->
+            <div class="metrics-grid" role="list" aria-label="Security metrics">
+
+              <!-- PSNR -->
+              <div class="metric-card" role="listitem" aria-label="PSNR metric">
+                <div class="metric-header">
+                  <div class="metric-icon-wrap metric-icon--blue">
+                    <i data-lucide="signal" aria-hidden="true"></i>
+                  </div>
+                  <span class="metric-label">PSNR</span>
+                  <span class="metric-status metric-status--good">Good</span>
+                </div>
+                <div class="metric-value">
+                  42.7
+                  <span class="metric-unit">dB</span>
+                </div>
+                <div class="metric-bar-wrap" aria-label="42.7 out of 50 dB">
+                  <div class="metric-bar">
+                    <div class="metric-bar-fill metric-bar-fill--blue" style="width: 85%"></div>
+                  </div>
+                  <span class="metric-range">0 – 50 dB</span>
+                </div>
+                <p class="metric-note">
+                  Peak Signal-to-Noise Ratio. Higher values indicate better imperceptibility.
+                </p>
+              </div>
+
+              <!-- SSIM -->
+              <div class="metric-card" role="listitem" aria-label="SSIM metric">
+                <div class="metric-header">
+                  <div class="metric-icon-wrap metric-icon--cyan">
+                    <i data-lucide="eye" aria-hidden="true"></i>
+                  </div>
+                  <span class="metric-label">SSIM</span>
+                  <span class="metric-status metric-status--good">Excellent</span>
+                </div>
+                <div class="metric-value">
+                  0.9874
+                  <span class="metric-unit">index</span>
+                </div>
+                <div class="metric-bar-wrap" aria-label="0.9874 out of 1.0">
+                  <div class="metric-bar">
+                    <div class="metric-bar-fill metric-bar-fill--cyan" style="width: 98.74%"></div>
+                  </div>
+                  <span class="metric-range">0.0 – 1.0</span>
+                </div>
+                <p class="metric-note">
+                  Structural Similarity Index. Measures perceptual quality vs. original.
+                </p>
+              </div>
+
+              <!-- Entropy -->
+              <div class="metric-card" role="listitem" aria-label="Entropy metric">
+                <div class="metric-header">
+                  <div class="metric-icon-wrap metric-icon--blue">
+                    <i data-lucide="waves" aria-hidden="true"></i>
+                  </div>
+                  <span class="metric-label">Entropy</span>
+                  <span class="metric-status metric-status--warn">Moderate</span>
+                </div>
+                <div class="metric-value">
+                  7.82
+                  <span class="metric-unit">bits</span>
+                </div>
+                <div class="metric-bar-wrap" aria-label="7.82 out of 8 bits">
+                  <div class="metric-bar">
+                    <div class="metric-bar-fill metric-bar-fill--blue" style="width: 97.75%"></div>
+                  </div>
+                  <span class="metric-range">0 – 8 bits</span>
+                </div>
+                <p class="metric-note">
+                  Shannon entropy of the watermarked image. Near-8 signals high randomness.
+                </p>
+              </div>
+
+              <!-- Security Score -->
+              <div class="metric-card metric-card--highlight" role="listitem" aria-label="Security score metric">
+                <div class="metric-header">
+                  <div class="metric-icon-wrap metric-icon--cyan">
+                    <i data-lucide="shield-check" aria-hidden="true"></i>
+                  </div>
+                  <span class="metric-label">Security Score</span>
+                  <span class="metric-status metric-status--good">Strong</span>
+                </div>
+                <div class="metric-value metric-value--accent">
+                  96
+                  <span class="metric-unit">/ 100</span>
+                </div>
+                <div class="metric-bar-wrap" aria-label="96 out of 100">
+                  <div class="metric-bar">
+                    <div class="metric-bar-fill metric-bar-fill--accent" style="width: 96%"></div>
+                  </div>
+                  <span class="metric-range">0 – 100</span>
+                </div>
+                <p class="metric-note">
+                  Composite score combining imperceptibility, robustness, and key entropy.
+                </p>
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <!-- ====================================================
+               BOTTOM ROW — Workflow + Recent Activity side by side
+          ==================================================== -->
+          <div class="bottom-row">
+
+            <!-- ================================================
+                 4. WORKFLOW CARD
+            ================================================ -->
+            <section class="dash-card workflow-card reveal" aria-label="Watermarking workflow">
+
+              <div class="card-header">
+                <div class="card-title-row">
+                  <div class="card-icon-wrap">
+                    <i data-lucide="git-branch" aria-hidden="true"></i>
+                  </div>
+                  <div>
+                    <h2 class="card-title">Workflow</h2>
+                    <p class="card-subtitle">Processing pipeline steps</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Vertical workflow timeline -->
+              <ol class="workflow-list" aria-label="Processing steps">
+
+                <li class="workflow-step workflow-step--pending">
+                  <div class="wf-step-left">
+                    <div class="wf-step-dot">
+                      <i data-lucide="upload-cloud" aria-hidden="true"></i>
+                    </div>
+                    <div class="wf-step-line" aria-hidden="true"></div>
+                  </div>
+                  <div class="wf-step-body">
+                    <span class="wf-step-name">Upload</span>
+                    <span class="wf-step-desc">Select or drop an image file</span>
+                  </div>
+                  <div class="wf-step-status" aria-label="Waiting">
+                    <span class="wf-badge wf-badge--pending">Waiting</span>
+                  </div>
+                </li>
+
+                <li class="workflow-step workflow-step--pending">
+                  <div class="wf-step-left">
+                    <div class="wf-step-dot">
+                      <i data-lucide="key-round" aria-hidden="true"></i>
+                    </div>
+                    <div class="wf-step-line" aria-hidden="true"></div>
+                  </div>
+                  <div class="wf-step-body">
+                    <span class="wf-step-name">Generate Quantum Key</span>
+                    <span class="wf-step-desc">256-bit quantum entropy key</span>
+                  </div>
+                  <div class="wf-step-status" aria-label="Waiting">
+                    <span class="wf-badge wf-badge--pending">Waiting</span>
+                  </div>
+                </li>
+
+                <li class="workflow-step workflow-step--pending">
+                  <div class="wf-step-left">
+                    <div class="wf-step-dot">
+                      <i data-lucide="layers" aria-hidden="true"></i>
+                    </div>
+                    <div class="wf-step-line" aria-hidden="true"></div>
+                  </div>
+                  <div class="wf-step-body">
+                    <span class="wf-step-name">Embed Watermark</span>
+                    <span class="wf-step-desc">DWT-SVD frequency-domain encoding</span>
+                  </div>
+                  <div class="wf-step-status" aria-label="Waiting">
+                    <span class="wf-badge wf-badge--pending">Waiting</span>
+                  </div>
+                </li>
+
+                <li class="workflow-step workflow-step--pending">
+                  <div class="wf-step-left">
+                    <div class="wf-step-dot">
+                      <i data-lucide="scan-line" aria-hidden="true"></i>
+                    </div>
+                    <div class="wf-step-line" aria-hidden="true"></div>
+                  </div>
+                  <div class="wf-step-body">
+                    <span class="wf-step-name">Analyze</span>
+                    <span class="wf-step-desc">PSNR, SSIM, and entropy analysis</span>
+                  </div>
+                  <div class="wf-step-status" aria-label="Waiting">
+                    <span class="wf-badge wf-badge--pending">Waiting</span>
+                  </div>
+                </li>
+
+                <li class="workflow-step workflow-step--pending">
+                  <div class="wf-step-left">
+                    <div class="wf-step-dot">
+                      <i data-lucide="check-check" aria-hidden="true"></i>
+                    </div>
+                    <div class="wf-step-line" aria-hidden="true"></div>
+                  </div>
+                  <div class="wf-step-body">
+                    <span class="wf-step-name">Verify</span>
+                    <span class="wf-step-desc">Integrity check and tamper detection</span>
+                  </div>
+                  <div class="wf-step-status" aria-label="Waiting">
+                    <span class="wf-badge wf-badge--pending">Waiting</span>
+                  </div>
+                </li>
+
+                <!-- Last step — no connecting line below -->
+                <li class="workflow-step workflow-step--pending workflow-step--last">
+                  <div class="wf-step-left">
+                    <div class="wf-step-dot wf-step-dot--final">
+                      <i data-lucide="file-badge-2" aria-hidden="true"></i>
+                    </div>
+                  </div>
+                  <div class="wf-step-body">
+                    <span class="wf-step-name">Certificate</span>
+                    <span class="wf-step-desc">Generate signed ownership certificate</span>
+                  </div>
+                  <div class="wf-step-status" aria-label="Waiting">
+                    <span class="wf-badge wf-badge--pending">Waiting</span>
+                  </div>
+                </li>
+
+              </ol>
+
+            </section>
+
+
+            <!-- ================================================
+                 5. RECENT ACTIVITY CARD
+            ================================================ -->
+            <section class="dash-card activity-card reveal" aria-label="Recent activity">
+
+              <div class="card-header">
+                <div class="card-title-row">
+                  <div class="card-icon-wrap card-icon-wrap--cyan">
+                    <i data-lucide="clock" aria-hidden="true"></i>
+                  </div>
+                  <div>
+                    <h2 class="card-title">Recent Activity</h2>
+                    <p class="card-subtitle">Last processed sessions</p>
+                  </div>
+                </div>
+                <!-- Filter tabs (UI only) -->
+                <div class="activity-tabs" role="tablist" aria-label="Filter activity">
+                  <button class="activity-tab active" role="tab" aria-selected="true">All</button>
+                  <button class="activity-tab" role="tab" aria-selected="false">Protected</button>
+                  <button class="activity-tab" role="tab" aria-selected="false">Verified</button>
+                </div>
+              </div>
+
+              <!-- Empty state -->
+              <div class="empty-state" aria-live="polite">
+                <div class="empty-icon" aria-hidden="true">
+                  <div class="empty-icon-ring"></div>
+                  <i data-lucide="inbox"></i>
+                </div>
+                <p class="empty-heading">No recent processing available</p>
+                <p class="empty-sub">
+                  Upload and process an image to see your activity history here.
+                </p>
+                <a href="#upload" class="btn btn-ghost btn-sm empty-action">
+                  <i data-lucide="upload-cloud" aria-hidden="true"></i>
+                  Upload Your First Image
+                </a>
+              </div>
+
+            </section>
+
+          </div><!-- /.bottom-row -->
+
+
+        </div><!-- /.content-container -->
+      </main>
+
+    </div><!-- /.main-wrapper -->
+
+
+    <!-- Sidebar overlay for mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
+
+    <!-- Dashboard script -->
+    <script type="module" src="./js/dashboard.js"></script>
+  </body>
+</html>

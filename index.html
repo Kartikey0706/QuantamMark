@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QuantumMark — Quantum-Secured Digital Watermarking</title>
+    <meta
+      name="description"
+      content="QuantumMark is a premium research platform for protecting digital images using secure watermarking enhanced with quantum randomness."
+    />
+    <meta property="og:title" content="QuantumMark" />
+    <meta
+      property="og:description"
+      content="Secure Digital Watermarking Powered by Quantum Randomness."
+    />
+    <meta property="og:type" content="website" />
+
+    <!-- Google Fonts: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Lucide Icons (UMD build, exposes window.lucide) -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+    <!-- Main stylesheet -->
+    <link rel="stylesheet" href="./css/style.css" />
+  </head>
+
+  <body>
+
+    <!-- ============================================================
+         NAVBAR — Sticky glass bar with blur backdrop
+    ============================================================ -->
+    <nav class="navbar" id="navbar" role="navigation" aria-label="Main navigation">
+      <div class="nav-inner">
+
+        <!-- Brand / Logo (text-only for now) -->
+        <a href="#" class="nav-logo" aria-label="QuantumMark home">
+          <span class="logo-q">Q</span>uantumMark
+        </a>
+
+        <!-- Desktop links -->
+        <ul class="nav-links" role="list">
+          <li><a href="#features"   class="nav-link">Features</a></li>
+          <li><a href="#technology" class="nav-link">Technology</a></li>
+          <li><a href="#research"   class="nav-link">Research</a></li>
+          <li><a href="#about"      class="nav-link">About</a></li>
+        </ul>
+
+        <!-- CTA button -->
+        <a href="dashboard.html" class="btn btn-primary btn-sm nav-cta" aria-label="Launch Dashboard">
+          <i data-lucide="layout-dashboard" aria-hidden="true"></i>
+          Launch Dashboard
+        </a>
+
+        <!-- Mobile hamburger -->
+        <button
+          class="nav-toggle"
+          id="navToggle"
+          aria-label="Toggle menu"
+          aria-expanded="false"
+          aria-controls="mobileMenu"
+        >
+          <i data-lucide="menu" aria-hidden="true"></i>
+        </button>
+
+      </div>
+
+      <!-- Mobile menu drawer -->
+      <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
+        <ul class="mobile-links" role="list">
+          <li><a href="#features"   class="mobile-link">Features</a></li>
+          <li><a href="#technology" class="mobile-link">Technology</a></li>
+          <li><a href="#research"   class="mobile-link">Research</a></li>
+          <li><a href="#about"      class="mobile-link">About</a></li>
+          <li>
+            <a href="dashboard.html" class="btn btn-primary btn-full">
+              <i data-lucide="layout-dashboard" aria-hidden="true"></i>
+              Launch Dashboard
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+
+    <!-- ============================================================
+         HERO SECTION
+    ============================================================ -->
+    <section class="hero" id="home" aria-label="Hero">
+      <div class="hero-bg-grid" aria-hidden="true"></div>
+      <div class="container hero-inner">
+
+        <!-- Left: Copy -->
+        <div class="hero-copy">
+          <div class="hero-badge">
+            <i data-lucide="atom" aria-hidden="true"></i>
+            Quantum-Powered Research Platform
+          </div>
+
+          <h1 class="hero-heading">
+            Secure Digital Watermarking Powered by
+            <span class="text-accent">Quantum Randomness</span>
+          </h1>
+
+          <p class="hero-desc">
+            A modern research platform for protecting digital images using
+            secure watermarking enhanced with quantum randomness. Invisible,
+            tamper-proof, and cryptographically verifiable.
+          </p>
+
+          <div class="hero-actions">
+            <a href="dashboard.html" class="btn btn-primary">
+              <i data-lucide="layout-dashboard" aria-hidden="true"></i>
+              Launch Dashboard
+            </a>
+            <a href="#features" class="btn btn-ghost">
+              Learn More
+              <i data-lucide="arrow-down" aria-hidden="true"></i>
+            </a>
+          </div>
+
+          <!-- Trust stats row -->
+          <div class="hero-stats" aria-label="Quick stats">
+            <div class="hero-stat">
+              <span class="stat-value">256-bit</span>
+              <span class="stat-label">Quantum Key</span>
+            </div>
+            <div class="stat-divider" aria-hidden="true"></div>
+            <div class="hero-stat">
+              <span class="stat-value">&lt;2ms</span>
+              <span class="stat-label">Embed Time</span>
+            </div>
+            <div class="stat-divider" aria-hidden="true"></div>
+            <div class="hero-stat">
+              <span class="stat-value">99.98%</span>
+              <span class="stat-label">Detection Rate</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Animated CSS Illustration -->
+        <div class="hero-illustration" aria-hidden="true">
+          <div class="illus-wrap">
+
+            <!-- Background ambient glow -->
+            <div class="illus-glow illus-glow--blue"></div>
+            <div class="illus-glow illus-glow--cyan"></div>
+
+            <!-- Rotating orbit rings -->
+            <div class="illus-ring illus-ring--1"></div>
+            <div class="illus-ring illus-ring--2"></div>
+            <div class="illus-ring illus-ring--3"></div>
+
+            <!-- Orbiting nodes on ring 2 -->
+            <div class="illus-nodes">
+              <div class="illus-node illus-node--1"></div>
+              <div class="illus-node illus-node--2"></div>
+              <div class="illus-node illus-node--3"></div>
+              <div class="illus-node illus-node--4"></div>
+            </div>
+
+            <!-- Central shield panel -->
+            <div class="illus-shield">
+              <div class="illus-shield-inner">
+                <!-- Lucide shield-check as large center icon -->
+                <i data-lucide="shield-check" class="illus-shield-icon"></i>
+                <!-- Scan line sweeping down the shield -->
+                <div class="illus-scanner"></div>
+              </div>
+            </div>
+
+            <!-- Corner circuit decorations -->
+            <div class="illus-corner illus-corner--tl" aria-hidden="true"></div>
+            <div class="illus-corner illus-corner--tr" aria-hidden="true"></div>
+            <div class="illus-corner illus-corner--bl" aria-hidden="true"></div>
+            <div class="illus-corner illus-corner--br" aria-hidden="true"></div>
+
+            <!-- Floating data-stream indicators -->
+            <div class="illus-stream illus-stream--1">
+              <span>Q-KEY</span>
+              <div class="stream-bar"></div>
+            </div>
+            <div class="illus-stream illus-stream--2">
+              <span>EMBED</span>
+              <div class="stream-bar"></div>
+            </div>
+            <div class="illus-stream illus-stream--3">
+              <span>VERIFY</span>
+              <div class="stream-bar"></div>
+            </div>
+
+            <!-- Floating particles -->
+            <div class="illus-particles">
+              <div class="particle p1"></div>
+              <div class="particle p2"></div>
+              <div class="particle p3"></div>
+              <div class="particle p4"></div>
+              <div class="particle p5"></div>
+              <div class="particle p6"></div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- ============================================================
+         FEATURES SECTION — Six premium glass cards
+    ============================================================ -->
+    <section class="section features" id="features" aria-label="Features">
+      <div class="container">
+
+        <div class="section-header">
+          <div class="section-badge">
+            <i data-lucide="sparkles" aria-hidden="true"></i>
+            Core Capabilities
+          </div>
+          <h2 class="section-title">Built for Serious Security Research</h2>
+          <p class="section-desc">
+            Every component of QuantumMark is engineered for precision,
+            combining cryptographic rigor with quantum entropy.
+          </p>
+        </div>
+
+        <div class="features-grid">
+
+          <!-- Card 1 -->
+          <article class="feature-card" aria-label="Quantum Randomness feature">
+            <div class="feature-card-top">
+              <div class="feature-icon-wrap feature-icon-wrap--blue">
+                <i data-lucide="atom" aria-hidden="true"></i>
+              </div>
+              <div class="feature-card-number">01</div>
+            </div>
+            <h3 class="feature-title">Quantum Randomness</h3>
+            <p class="feature-desc">
+              True entropy sourced from quantum mechanical processes, ensuring
+              cryptographically unpredictable watermark keys that cannot be
+              replicated or guessed.
+            </p>
+            <div class="feature-tag">
+              <i data-lucide="zap" aria-hidden="true"></i>
+              Entropy-as-a-Service
+            </div>
+          </article>
+
+          <!-- Card 2 -->
+          <article class="feature-card" aria-label="Invisible Watermark feature">
+            <div class="feature-card-top">
+              <div class="feature-icon-wrap feature-icon-wrap--cyan">
+                <i data-lucide="eye-off" aria-hidden="true"></i>
+              </div>
+              <div class="feature-card-number">02</div>
+            </div>
+            <h3 class="feature-title">Invisible Watermark</h3>
+            <p class="feature-desc">
+              Perceptually transparent marks embedded in the frequency domain,
+              surviving JPEG compression, cropping, resizing, and color
+              space transformations.
+            </p>
+            <div class="feature-tag">
+              <i data-lucide="layers" aria-hidden="true"></i>
+              DCT / DWT Encoding
+            </div>
+          </article>
+
+          <!-- Card 3 -->
+          <article class="feature-card" aria-label="Security Analytics feature">
+            <div class="feature-card-top">
+              <div class="feature-icon-wrap feature-icon-wrap--blue">
+                <i data-lucide="bar-chart-2" aria-hidden="true"></i>
+              </div>
+              <div class="feature-card-number">03</div>
+            </div>
+            <h3 class="feature-title">Security Analytics</h3>
+            <p class="feature-desc">
+              Real-time integrity analysis with confidence scoring, signal-to-noise
+              ratio measurements, and actionable risk assessment reports for
+              every watermarked asset.
+            </p>
+            <div class="feature-tag">
+              <i data-lucide="activity" aria-hidden="true"></i>
+              Live SNR Monitoring
+            </div>
+          </article>
+
+          <!-- Card 4 -->
+          <article class="feature-card" aria-label="Tamper Detection feature">
+            <div class="feature-card-top">
+              <div class="feature-icon-wrap feature-icon-wrap--cyan">
+                <i data-lucide="shield-alert" aria-hidden="true"></i>
+              </div>
+              <div class="feature-card-number">04</div>
+            </div>
+            <h3 class="feature-title">Tamper Detection</h3>
+            <p class="feature-desc">
+              Instantly identify unauthorized modifications, surgical edits, or
+              adversarial attempts to strip embedded marks — down to the
+              pixel-block level.
+            </p>
+            <div class="feature-tag">
+              <i data-lucide="scan-line" aria-hidden="true"></i>
+              Block-Level Analysis
+            </div>
+          </article>
+
+          <!-- Card 5 -->
+          <article class="feature-card" aria-label="Ownership Certificate feature">
+            <div class="feature-card-top">
+              <div class="feature-icon-wrap feature-icon-wrap--blue">
+                <i data-lucide="award" aria-hidden="true"></i>
+              </div>
+              <div class="feature-card-number">05</div>
+            </div>
+            <h3 class="feature-title">Ownership Certificate</h3>
+            <p class="feature-desc">
+              Generate cryptographically signed certificates that immutably bind
+              each image to a verified owner identity, timestamp, and quantum key
+              fingerprint.
+            </p>
+            <div class="feature-tag">
+              <i data-lucide="file-badge" aria-hidden="true"></i>
+              Ed25519 Signatures
+            </div>
+          </article>
+
+          <!-- Card 6 -->
+          <article class="feature-card" aria-label="Image Verification feature">
+            <div class="feature-card-top">
+              <div class="feature-icon-wrap feature-icon-wrap--cyan">
+                <i data-lucide="check-circle-2" aria-hidden="true"></i>
+              </div>
+              <div class="feature-card-number">06</div>
+            </div>
+            <h3 class="feature-title">Image Verification</h3>
+            <p class="feature-desc">
+              Verify authenticity and trace ownership of any image in seconds.
+              Drag, drop, or provide a URL — the engine returns a full
+              provenance chain with confidence metrics.
+            </p>
+            <div class="feature-tag">
+              <i data-lucide="search" aria-hidden="true"></i>
+              Instant Provenance
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ============================================================
+         TECHNOLOGY / HOW IT WORKS SECTION — Horizontal timeline
+    ============================================================ -->
+    <section class="section technology" id="technology" aria-label="How it works">
+      <div class="container">
+
+        <div class="section-header">
+          <div class="section-badge">
+            <i data-lucide="workflow" aria-hidden="true"></i>
+            The Process
+          </div>
+          <h2 class="section-title">How QuantumMark Works</h2>
+          <p class="section-desc">
+            Six precise steps from raw image to cryptographically certified,
+            quantum-watermarked asset.
+          </p>
+        </div>
+
+        <!-- Horizontal timeline (scrollable on mobile) -->
+        <div class="timeline-wrapper" role="list" aria-label="Watermarking workflow steps">
+
+          <!-- Step 1 -->
+          <div class="timeline-step" role="listitem">
+            <div class="timeline-step-inner">
+              <div class="step-icon-wrap">
+                <i data-lucide="upload-cloud" aria-hidden="true"></i>
+              </div>
+              <div class="step-number">01</div>
+              <h3 class="step-title">Upload Image</h3>
+              <p class="step-desc">Submit a JPEG, PNG, or WebP image through the secure upload interface.</p>
+            </div>
+            <div class="timeline-connector" aria-hidden="true">
+              <div class="connector-line"></div>
+              <i data-lucide="chevron-right" class="connector-arrow"></i>
+            </div>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="timeline-step" role="listitem">
+            <div class="timeline-step-inner">
+              <div class="step-icon-wrap">
+                <i data-lucide="key-round" aria-hidden="true"></i>
+              </div>
+              <div class="step-number">02</div>
+              <h3 class="step-title">Generate Quantum Key</h3>
+              <p class="step-desc">A 256-bit key is generated from a quantum entropy source for this image alone.</p>
+            </div>
+            <div class="timeline-connector" aria-hidden="true">
+              <div class="connector-line"></div>
+              <i data-lucide="chevron-right" class="connector-arrow"></i>
+            </div>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="timeline-step" role="listitem">
+            <div class="timeline-step-inner">
+              <div class="step-icon-wrap">
+                <i data-lucide="layers" aria-hidden="true"></i>
+              </div>
+              <div class="step-number">03</div>
+              <h3 class="step-title">Embed Watermark</h3>
+              <p class="step-desc">The mark is encoded into the image's frequency domain — invisible to the eye.</p>
+            </div>
+            <div class="timeline-connector" aria-hidden="true">
+              <div class="connector-line"></div>
+              <i data-lucide="chevron-right" class="connector-arrow"></i>
+            </div>
+          </div>
+
+          <!-- Step 4 -->
+          <div class="timeline-step" role="listitem">
+            <div class="timeline-step-inner">
+              <div class="step-icon-wrap">
+                <i data-lucide="scan-line" aria-hidden="true"></i>
+              </div>
+              <div class="step-number">04</div>
+              <h3 class="step-title">Analyze Security</h3>
+              <p class="step-desc">Run integrity analysis and compute SNR scores across all image blocks.</p>
+            </div>
+            <div class="timeline-connector" aria-hidden="true">
+              <div class="connector-line"></div>
+              <i data-lucide="chevron-right" class="connector-arrow"></i>
+            </div>
+          </div>
+
+          <!-- Step 5 -->
+          <div class="timeline-step" role="listitem">
+            <div class="timeline-step-inner">
+              <div class="step-icon-wrap">
+                <i data-lucide="check-check" aria-hidden="true"></i>
+              </div>
+              <div class="step-number">05</div>
+              <h3 class="step-title">Verify</h3>
+              <p class="step-desc">Confirm the watermark is intact, detect any tamper attempts with confidence scores.</p>
+            </div>
+            <div class="timeline-connector" aria-hidden="true">
+              <div class="connector-line"></div>
+              <i data-lucide="chevron-right" class="connector-arrow"></i>
+            </div>
+          </div>
+
+          <!-- Step 6 -->
+          <div class="timeline-step timeline-step--last" role="listitem">
+            <div class="timeline-step-inner">
+              <div class="step-icon-wrap step-icon-wrap--accent">
+                <i data-lucide="file-badge-2" aria-hidden="true"></i>
+              </div>
+              <div class="step-number step-number--accent">06</div>
+              <h3 class="step-title">Generate Certificate</h3>
+              <p class="step-desc">Issue a signed ownership certificate with the quantum key fingerprint and timestamp.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ============================================================
+         RESEARCH SECTION — Anchor / placeholder for nav link
+    ============================================================ -->
+    <section class="section research" id="research" aria-label="Research highlights">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-badge">
+            <i data-lucide="flask-conical" aria-hidden="true"></i>
+            Research
+          </div>
+          <h2 class="section-title">Grounded in Peer-Reviewed Science</h2>
+          <p class="section-desc">
+            QuantumMark is built on published research in quantum cryptography,
+            steganography, and digital forensics.
+          </p>
+        </div>
+
+        <div class="research-grid">
+          <div class="research-card">
+            <div class="research-card-icon">
+              <i data-lucide="microscope" aria-hidden="true"></i>
+            </div>
+            <div class="research-card-body">
+              <div class="research-tag">Cryptography</div>
+              <h3>Quantum Key Distribution for Watermarking</h3>
+              <p>Applying BB84-inspired entropy harvesting to derive per-image keys with provable randomness guarantees.</p>
+              <a href="#" class="research-link">
+                Read abstract <i data-lucide="arrow-up-right" aria-hidden="true"></i>
+              </a>
+            </div>
+          </div>
+
+          <div class="research-card">
+            <div class="research-card-icon">
+              <i data-lucide="cpu" aria-hidden="true"></i>
+            </div>
+            <div class="research-card-body">
+              <div class="research-tag">Signal Processing</div>
+              <h3>Robust DWT-SVD Watermarking Under Compression Attacks</h3>
+              <p>Benchmarking frequency-domain embedding against JPEG, WebP, and adversarial perturbation scenarios.</p>
+              <a href="#" class="research-link">
+                Read abstract <i data-lucide="arrow-up-right" aria-hidden="true"></i>
+              </a>
+            </div>
+          </div>
+
+          <div class="research-card">
+            <div class="research-card-icon">
+              <i data-lucide="shield-check" aria-hidden="true"></i>
+            </div>
+            <div class="research-card-body">
+              <div class="research-tag">Digital Forensics</div>
+              <h3>Certificate Chains for Image Provenance Verification</h3>
+              <p>Designing tamper-evident certificate structures using Ed25519 signatures and Merkle-path proofs.</p>
+              <a href="#" class="research-link">
+                Read abstract <i data-lucide="arrow-up-right" aria-hidden="true"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ============================================================
+         ABOUT SECTION — Anchor for nav link
+    ============================================================ -->
+    <section class="section about" id="about" aria-label="About QuantumMark">
+      <div class="container about-inner">
+
+        <div class="about-copy">
+          <div class="section-badge">
+            <i data-lucide="info" aria-hidden="true"></i>
+            About
+          </div>
+          <h2 class="section-title">What Is QuantumMark?</h2>
+          <p class="about-text">
+            QuantumMark is an academic research platform exploring the intersection
+            of quantum cryptography and digital image forensics. Our goal is to
+            produce open, reproducible tooling for the scientific community —
+            enabling researchers to protect, trace, and certify digital media
+            with the highest security guarantees available.
+          </p>
+          <p class="about-text">
+            The project is active, open to collaboration, and currently seeking
+            peer review. If you work in cryptography, signal processing, or
+            digital rights management, we'd love to hear from you.
+          </p>
+          <a href="#" class="btn btn-primary">
+            <i data-lucide="mail" aria-hidden="true"></i>
+            Contact the Team
+          </a>
+        </div>
+
+        <div class="about-values">
+          <div class="value-item">
+            <i data-lucide="lock" aria-hidden="true"></i>
+            <div>
+              <strong>Open Science</strong>
+              <span>All algorithms are published and reproducible.</span>
+            </div>
+          </div>
+          <div class="value-item">
+            <i data-lucide="shield" aria-hidden="true"></i>
+            <div>
+              <strong>Rigorous Security</strong>
+              <span>No security through obscurity — only math.</span>
+            </div>
+          </div>
+          <div class="value-item">
+            <i data-lucide="users" aria-hidden="true"></i>
+            <div>
+              <strong>Community Driven</strong>
+              <span>Built with and for the research community.</span>
+            </div>
+          </div>
+          <div class="value-item">
+            <i data-lucide="git-branch" aria-hidden="true"></i>
+            <div>
+              <strong>Fully Open Source</strong>
+              <span>MIT-licensed, peer-reviewed implementation.</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- ============================================================
+         FOOTER
+    ============================================================ -->
+    <footer class="footer" role="contentinfo">
+      <div class="container footer-inner">
+
+        <!-- Brand column -->
+        <div class="footer-brand">
+          <a href="#" class="nav-logo footer-logo" aria-label="QuantumMark home">
+            <span class="logo-q">Q</span>uantumMark
+          </a>
+          <p class="footer-tagline">
+            Quantum-secured digital watermarking for the modern research era.
+          </p>
+          <div class="footer-social">
+            <a href="#" class="social-link" aria-label="GitHub">
+              <i data-lucide="git-branch" aria-hidden="true"></i>
+            </a>
+            <a href="#" class="social-link" aria-label="Twitter / X">
+              <i data-lucide="x" aria-hidden="true"></i>
+            </a>
+            <a href="#" class="social-link" aria-label="Email">
+              <i data-lucide="mail" aria-hidden="true"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- Nav columns -->
+        <div class="footer-links-col">
+          <h4 class="footer-col-title">Platform</h4>
+          <ul role="list">
+            <li><a href="#features">Features</a></li>
+            <li><a href="#technology">Technology</a></li>
+            <li><a href="#research">Research</a></li>
+            <li><a href="#about">About</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-links-col">
+          <h4 class="footer-col-title">Resources</h4>
+          <ul role="list">
+            <li><a href="#">Documentation</a></li>
+            <li><a href="#">API Reference</a></li>
+            <li><a href="#">Publications</a></li>
+            <li><a href="#">Changelog</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-links-col">
+          <h4 class="footer-col-title">Legal</h4>
+          <ul role="list">
+            <li><a href="#">MIT License</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Terms of Use</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- Bottom bar -->
+      <div class="footer-bottom">
+        <div class="container">
+          <span>&copy; 2025 QuantumMark Research Project. All rights reserved.</span>
+          <span class="footer-bottom-right">
+            Built with
+            <i data-lucide="atom" class="footer-atom" aria-hidden="true"></i>
+            quantum precision.
+          </span>
+        </div>
+      </div>
+    </footer>
+
+
+    <!-- Main script -->
+    <script type="module" src="script.js"></script>
+  </body>
+</html>
