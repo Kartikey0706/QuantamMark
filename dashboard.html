@@ -320,147 +320,221 @@
 
             <!-- Protect Image Workspace (hidden until user opens it) -->
             <section class="dash-card protect-workspace reveal" id="protectWorkspace" aria-label="Protect Image Workspace" hidden>
-              <div class="protect-grid">
 
-                <!-- LEFT PANEL -->
-                <div class="pw-left">
-                  <h3 class="pw-panel-title">Original Image</h3>
-                  <div class="pw-card">
-                    <div class="pw-preview-wrap">
-                      <img id="origPreviewLarge" alt="Original image preview" />
+              <!-- ---- TOP SECTION: ORIGINAL IMAGE PREVIEW ---- -->
+              <div class="pw-top-section">
+                <h3 class="pw-section-heading">Original Image</h3>
+                <div class="pw-image-preview">
+                  <img id="origPreviewLarge" alt="Original image preview" />
+                </div>
+              </div>
+
+              <!-- ---- WATERMARK TYPE SELECTOR (Premium Cards) ---- -->
+              <div class="pw-mid-section">
+                <h3 class="pw-section-heading">Watermark Type</h3>
+                <p class="pw-section-subtext">Select one watermark type</p>
+                <div class="pw-type-selector">
+
+                  <!-- Text Card -->
+                  <label class="pw-type-card">
+                    <input type="radio" name="pwWatermarkType" value="text" class="pw-type-radio" />
+                    <div class="pw-type-content">
+                      <div class="pw-type-icon">
+                        <i data-lucide="type"></i>
+                      </div>
+                      <div class="pw-type-info">
+                        <h4 class="pw-type-name">Text</h4>
+                        <p class="pw-type-desc">Embed custom text</p>
+                      </div>
                     </div>
-                    <div class="pw-subcard">
-                      <label class="pw-sublabel">Watermark Image</label>
-                      <div class="small-dropzone" id="watermarkDrop" role="region" aria-label="Upload watermark image">
-                        <div class="small-drop-inner">
-                          <i data-lucide="image"></i>
-                          <div class="small-drop-copy">
-                            <div class="small-drop-heading">Drop watermark here</div>
-                            <div class="small-drop-sub">or click to browse</div>
-                          </div>
-                        </div>
-                        <input type="file" id="watermarkInput" accept=".png,.jpg,.jpeg" hidden />
+                  </label>
+
+                  <!-- Logo Card -->
+                  <label class="pw-type-card">
+                    <input type="radio" name="pwWatermarkType" value="logo" class="pw-type-radio" />
+                    <div class="pw-type-content">
+                      <div class="pw-type-icon">
+                        <i data-lucide="image"></i>
                       </div>
-                      <div class="pw-watermark-preview" id="watermarkPreview" hidden>
-                        <img id="watermarkPreviewImg" alt="Watermark preview" />
-                        <div class="pw-watermark-meta">
-                          <div><strong id="wmName">-</strong></div>
-                          <div id="wmSize">-</div>
-                        </div>
-                        <div class="pw-watermark-actions">
-                          <button class="btn btn-ghost btn-sm" id="removeWmBtn"><i data-lucide="x-circle"></i> Remove</button>
-                        </div>
+                      <div class="pw-type-info">
+                        <h4 class="pw-type-name">Logo</h4>
+                        <p class="pw-type-desc">Upload PNG logo</p>
                       </div>
+                    </div>
+                  </label>
+
+                  <!-- QR Code Card -->
+                  <label class="pw-type-card">
+                    <input type="radio" name="pwWatermarkType" value="qrcode" class="pw-type-radio" />
+                    <div class="pw-type-content">
+                      <div class="pw-type-icon">
+                        <i data-lucide="qr-code"></i>
+                      </div>
+                      <div class="pw-type-info">
+                        <h4 class="pw-type-name">QR Code</h4>
+                        <p class="pw-type-desc">Auto-generated QR</p>
+                      </div>
+                    </div>
+                  </label>
+
+                </div>
+              </div>
+
+              <!-- ---- WATERMARK CONFIGURATION (Conditional) ---- -->
+              <div class="pw-config-section" id="pwConfigSection" hidden>
+
+                <!-- Text Input Section -->
+                <div class="pw-config-panel" id="pwTextPanel" hidden>
+                  <h4 class="pw-config-title">Text Watermark</h4>
+                  <input type="text" id="pwTextInput" class="pw-text-input" placeholder="Enter watermark text..." />
+                </div>
+
+                <!-- Logo Upload Section -->
+                <div class="pw-config-panel" id="pwLogoPanel" hidden>
+                  <h4 class="pw-config-title">Logo Watermark</h4>
+                  <div class="pw-file-dropzone" id="pwLogoDrop" role="region" aria-label="Upload logo">
+                    <div class="pw-file-drop-inner">
+                      <i data-lucide="upload-cloud"></i>
+                      <div class="pw-file-drop-copy">
+                        <div class="pw-file-drop-heading">Upload Logo</div>
+                        <div class="pw-file-drop-sub">PNG preferred • Click to browse</div>
+                      </div>
+                    </div>
+                    <input type="file" id="pwLogoInput" accept=".png,.jpg,.jpeg" hidden />
+                  </div>
+                  <div class="pw-logo-preview" id="pwLogoPreview" hidden>
+                    <img id="pwLogoPreviewImg" alt="Logo preview" />
+                    <button type="button" class="btn btn-ghost btn-sm" id="pwRemoveLogoBtn">
+                      <i data-lucide="x-circle"></i>
+                      Remove
+                    </button>
+                  </div>
+                </div>
+
+                <!-- QR Code Section -->
+                <div class="pw-config-panel" id="pwQRPanel" hidden>
+                  <h4 class="pw-config-title">QR Code Watermark</h4>
+                  <div class="pw-qr-notice">
+                    <i data-lucide="info"></i>
+                    <span>QR watermark will be generated automatically</span>
+                  </div>
+                </div>
+
+                <!-- Watermark Strength (Radio Buttons) -->
+                <div class="pw-strength-section">
+                  <h4 class="pw-config-title">Watermark Strength</h4>
+                  <div class="pw-strength-options">
+                    <label class="pw-strength-option">
+                      <input type="radio" name="pwStrength" value="low" />
+                      <span>Low</span>
+                    </label>
+                    <label class="pw-strength-option">
+                      <input type="radio" name="pwStrength" value="medium" checked />
+                      <span>Medium</span>
+                    </label>
+                    <label class="pw-strength-option">
+                      <input type="radio" name="pwStrength" value="high" />
+                      <span>High</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Embedding Algorithm -->
+                <div class="pw-algorithm-section">
+                  <h4 class="pw-config-title">Embedding Algorithm</h4>
+                  <div class="pw-algorithm-display">
+                    <div class="pw-algorithm-item active">
+                      <div class="pw-algo-badge">Active</div>
+                      <span>LSB</span>
+                    </div>
+                    <div class="pw-algorithm-item">
+                      <div class="pw-algo-badge coming">Coming Soon</div>
+                      <span>DCT</span>
+                    </div>
+                    <div class="pw-algorithm-item">
+                      <div class="pw-algo-badge coming">Coming Soon</div>
+                      <span>DWT</span>
                     </div>
                   </div>
                 </div>
 
-                <!-- CENTER PANEL -->
-                <div class="pw-center">
-                  <h3 class="pw-panel-title">Protection Settings</h3>
-                  <div class="pw-card">
-                    <div class="pw-field">
-                      <label class="pw-label">Watermark Type</label>
-                      <div class="pw-options">
-                        <label><input type="radio" name="wmType" value="text" /> Text</label>
-                        <label><input type="radio" name="wmType" value="image" checked /> Image</label>
-                      </div>
-                    </div>
-
-                    <div class="pw-field">
-                      <label class="pw-label">Embedding Method</label>
-                      <div class="pw-options">
-                        <label class="pw-method"><input type="radio" name="embedMethod" value="lsb" checked /> LSB</label>
-                        <label class="pw-method disabled"><input type="radio" name="embedMethod" value="dct" disabled /> DCT <span class="coming">Coming Soon</span></label>
-                        <label class="pw-method disabled"><input type="radio" name="embedMethod" value="dwt" disabled /> DWT <span class="coming">Coming Soon</span></label>
-                      </div>
-                    </div>
-
-                    <div class="pw-field">
-                      <label class="pw-label">Watermark Strength</label>
-                      <div class="pw-slider-wrap">
-                        <input type="range" id="wmStrength" min="0" max="100" value="50" />
-                        <div class="wm-strength-labels"><span>Low</span><span>Medium</span><span>High</span></div>
-                      </div>
-                    </div>
-
-                    <div class="pw-field">
-                      <label class="pw-label">Quantum Key</label>
-                      <div class="pw-quantum">
-                        <input type="text" id="quantumKey" readonly />
-                        <button class="btn btn-ghost btn-sm" id="genQuantumBtn">Generate Quantum Key</button>
-                      </div>
-                    </div>
-
-                  </div>
-                </div>
-
-                <!-- RIGHT PANEL -->
-                <div class="pw-right">
-                  <h3 class="pw-panel-title">Security Information</h3>
-                  <div class="pw-card pw-metrics">
-                    <div class="metric-small">
-                      <div class="metric-small-label">PSNR</div>
-                      <div class="metric-small-value" id="mPsnr">--</div>
-                    </div>
-                    <div class="metric-small">
-                      <div class="metric-small-label">SSIM</div>
-                      <div class="metric-small-value" id="mSsim">--</div>
-                    </div>
-                    <div class="metric-small">
-                      <div class="metric-small-label">Entropy</div>
-                      <div class="metric-small-value" id="mEntropy">--</div>
-                    </div>
-                    <div class="metric-small">
-                      <div class="metric-small-label">Embedding Time</div>
-                      <div class="metric-small-value" id="mEmbeddingTime">--</div>
-                    </div>
-                    <div class="metric-small">
-                      <div class="metric-small-label">Key Length</div>
-                      <div class="metric-small-value" id="mKeyLength">--</div>
-                    </div>
-                    <div class="metric-small">
-                      <div class="metric-small-label">Security Level</div>
-                      <div class="metric-small-value" id="mSecurity">Waiting...</div>
-                    </div>
-                  </div>
-
-                  <div class="pw-protected-preview" id="pwProtected" hidden>
-                    <h4 class="pw-panel-title">Protected Image</h4>
-                    <div class="pw-preview-wrap">
-                      <img id="protectedPreviewLarge" alt="Protected image preview" />
-                    </div>
-                  </div>
-
-                  <div class="pw-card pw-output">
-                    <h4 class="pw-output-title">Output</h4>
-                    <div class="pw-output-row"><span>Protected Image</span><span id="outProtected">Not generated</span></div>
-                    <div class="pw-output-row"><span>Certificate</span><span id="outCert">Pending</span></div>
-                    <div class="pw-output-row"><span>QR Verification</span><span id="outQr">Optional</span></div>
-                    <div class="pw-output-actions" style="margin-top:12px; display:flex; gap:8px;">
-                      <button class="btn btn-primary" id="genCertBtn" disabled>Generate Certificate</button>
-                      <button class="btn btn-ghost" id="qrBtn" disabled>QR Verification</button>
-                    </div>
+                <!-- Quantum Key -->
+                <div class="pw-quantum-section">
+                  <h4 class="pw-config-title">Quantum Key</h4>
+                  <div class="pw-quantum-input-group">
+                    <input type="text" id="pwQuantumKey" readonly class="pw-quantum-input" />
+                    <button type="button" class="btn btn-primary btn-sm" id="pwGenQuantumBtn">
+                      <i data-lucide="key"></i>
+                      Generate Quantum Key
+                    </button>
                   </div>
                 </div>
 
               </div>
 
-              <!-- Bottom action bar -->
+              <!-- ---- ANALYTICS & RESULTS ---- -->
+              <div class="pw-analytics-section" id="pwAnalyticsSection" hidden>
+                <h3 class="pw-section-heading">Protected Image Analytics</h3>
+                <div class="pw-analytics-grid">
+                  <div class="pw-metric-card">
+                    <span class="pw-metric-label">PSNR</span>
+                    <span class="pw-metric-value" id="pwMetricPSNR">42.81 dB</span>
+                  </div>
+                  <div class="pw-metric-card">
+                    <span class="pw-metric-label">SSIM</span>
+                    <span class="pw-metric-value" id="pwMetricSSIM">0.993</span>
+                  </div>
+                  <div class="pw-metric-card">
+                    <span class="pw-metric-label">Entropy</span>
+                    <span class="pw-metric-value" id="pwMetricEntropy">7.91</span>
+                  </div>
+                  <div class="pw-metric-card">
+                    <span class="pw-metric-label">Embedding Time</span>
+                    <span class="pw-metric-value" id="pwMetricTime">0.42 s</span>
+                  </div>
+                  <div class="pw-metric-card">
+                    <span class="pw-metric-label">Security Level</span>
+                    <span class="pw-metric-value pw-security-high" id="pwMetricSecurity">HIGH</span>
+                  </div>
+                  <div class="pw-metric-card">
+                    <span class="pw-metric-label">Key Length</span>
+                    <span class="pw-metric-value" id="pwMetricKeyLen">256-bit</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ---- PROTECTED IMAGE PREVIEW ---- -->
+              <div class="pw-protected-section" id="pwProtectedSection" hidden>
+                <h3 class="pw-section-heading">Protected Image</h3>
+                <div class="pw-protected-preview">
+                  <img id="pwProtectedImage" alt="Protected image preview" />
+                </div>
+              </div>
+
+              <!-- ---- ACTION BUTTONS ---- -->
               <div class="pw-action-bar">
                 <div class="pw-action-left">
-                  <button class="btn btn-primary" id="genBtn" disabled>Generate Watermark</button>
-                  <button class="btn btn-ghost" id="resetBtn">Reset</button>
+                  <button type="button" class="btn btn-primary" id="pwGenerateBtn" disabled>
+                    <i data-lucide="zap"></i>
+                    Generate Watermark
+                  </button>
+                  <button type="button" class="btn btn-ghost" id="pwResetBtn">
+                    <i data-lucide="refresh-cw"></i>
+                    Reset Workspace
+                  </button>
                 </div>
                 <div class="pw-action-right">
-                  <button class="btn btn-primary" id="downloadBtn" disabled>Download Protected Image</button>
+                  <button type="button" class="btn btn-primary" id="pwDownloadBtn" disabled>
+                    <i data-lucide="download"></i>
+                    Download Protected Image
+                  </button>
                 </div>
               </div>
 
-              <!-- Processing overlay (inside workspace) -->
+              <!-- Processing Overlay -->
               <div class="pw-overlay" id="pwOverlay" hidden aria-hidden="true">
                 <div class="pw-overlay-card">
-                  <h4>Processing</h4>
+                  <h4>Processing Watermark</h4>
                   <div class="pw-steps" id="pwSteps">
                     <!-- Steps injected by JS -->
                   </div>
@@ -468,8 +542,11 @@
                 </div>
               </div>
 
-              <!-- Success badge -->
-              <div class="pw-success" id="pwSuccess" hidden>Watermark Successfully Embedded</div>
+              <!-- Success Badge -->
+              <div class="pw-success" id="pwSuccess" hidden>
+                <i data-lucide="check-circle"></i>
+                Watermark Successfully Embedded
+              </div>
 
             </section>
 

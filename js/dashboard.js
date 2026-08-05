@@ -271,167 +271,384 @@ function initDropzone() {
    8. Protect Workspace — premium UI and interactions
    ============================================================ */
 function initProtectWorkspace() {
-  const openUploadLinks = document.querySelectorAll('a[href="#upload"]');
+  // Elements
   const workspace = document.getElementById('protectWorkspace');
-  const origPreview = document.getElementById('origPreviewLarge');
-  const origSmallPreview = document.getElementById('previewImage'); // existing original preview
-  const watermarkDrop = document.getElementById('watermarkDrop');
-  const watermarkInput = document.getElementById('watermarkInput');
-  const watermarkPreview = document.getElementById('watermarkPreview');
-  const watermarkPreviewImg = document.getElementById('watermarkPreviewImg');
-  const wmName = document.getElementById('wmName');
-  const wmSize = document.getElementById('wmSize');
-  const removeWmBtn = document.getElementById('removeWmBtn');
-  const genBtn = document.getElementById('genBtn');
-  const resetBtn = document.getElementById('resetBtn');
-  const downloadBtn = document.getElementById('downloadBtn');
+  const origPreviewLarge = document.getElementById('origPreviewLarge');
+  const origSmallPreview = document.getElementById('previewImage');
+  const typeRadios = document.querySelectorAll('input[name="pwWatermarkType"]');
+  const configSection = document.getElementById('pwConfigSection');
+  const textPanel = document.getElementById('pwTextPanel');
+  const textInput = document.getElementById('pwTextInput');
+  const logoPanel = document.getElementById('pwLogoPanel');
+  const qrPanel = document.getElementById('pwQRPanel');
+  const logoDrop = document.getElementById('pwLogoDrop');
+  const logoInput = document.getElementById('pwLogoInput');
+  const logoPreview = document.getElementById('pwLogoPreview');
+  const logoPreviewImg = document.getElementById('pwLogoPreviewImg');
+  const removeLogoBtn = document.getElementById('pwRemoveLogoBtn');
+  const strengthRadios = document.querySelectorAll('input[name="pwStrength"]');
+  const quantumKeyInput = document.getElementById('pwQuantumKey');
+  const genQuantumBtn = document.getElementById('pwGenQuantumBtn');
+  const generateBtn = document.getElementById('pwGenerateBtn');
+  const resetBtn = document.getElementById('pwResetBtn');
+  const downloadBtn = document.getElementById('pwDownloadBtn');
+  const analyticsSection = document.getElementById('pwAnalyticsSection');
+  const protectedSection = document.getElementById('pwProtectedSection');
+  const protectedImage = document.getElementById('pwProtectedImage');
+  const overlay = document.getElementById('pwOverlay');
+  const steps = document.getElementById('pwSteps');
+  const successBadge = document.getElementById('pwSuccess');
   const continueBtn = document.getElementById('continueBtn');
   const imageInput = document.getElementById('imageInput');
-  const quantumKeyInput = document.getElementById('quantumKey');
-  const genQuantumBtn = document.getElementById('genQuantumBtn');
+  const dropzone = document.getElementById('dropzone');
 
   if (!workspace) return;
 
-  // Helper to reveal workspace
+  // State
+  let selectedWatermarkType = null;
+  let logoFile = null;
+
+  // Show workspace when original image is loaded
   function showWorkspace() {
     if (workspace.hasAttribute('hidden')) workspace.removeAttribute('hidden');
     workspace.classList.add('visible');
   }
 
-  // Bind welcome Upload link(s) to open workspace
-  openUploadLinks.forEach(link => link.addEventListener('click', (e) => {
-    // allow default anchor navigation but also reveal workspace
-    setTimeout(showWorkspace, 50);
-  }));
-
-  // When an original image is loaded in the main dropzone, copy preview into the left panel and show workspace
   function syncOriginalPreview() {
-    if (!origSmallPreview) return;
-    if (origSmallPreview.src) {
-      origPreview.src = origSmallPreview.src;
+    if (origSmallPreview && origSmallPreview.src) {
+      origPreviewLarge.src = origSmallPreview.src;
       showWorkspace();
       updateGenerateState();
     }
   }
 
-  // Also watch for changes to the existing image input used earlier
   if (imageInput) {
     imageInput.addEventListener('change', () => {
       syncOriginalPreview();
     });
   }
 
-  // Watermark dropzone behaviour
-  let wmDragCounter = 0;
-  watermarkDrop.addEventListener('dragenter', (e) => { e.preventDefault(); wmDragCounter++; watermarkDrop.classList.add('drag-over'); });
-  watermarkDrop.addEventListener('dragover', (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; });
-  watermarkDrop.addEventListener('dragleave', () => { wmDragCounter--; if (wmDragCounter<=0){ wmDragCounter=0; watermarkDrop.classList.remove('drag-over'); } });
-  watermarkDrop.addEventListener('drop', (e) => { e.preventDefault(); wmDragCounter=0; watermarkDrop.classList.remove('drag-over'); handleWmFiles(e.dataTransfer.files); });
-  watermarkDrop.addEventListener('click', () => watermarkInput.click());
-  watermarkInput.addEventListener('change', () => handleWmFiles(watermarkInput.files));
+  // Watermark type selector
+  typeRadios.forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      selectedWatermarkType = e.target.value;
+      configSection.removeAttribute('hidden');
+      
+      // Show/hide conditional panels
+      textPanel.setAttribute('hidden', '');
+      logoPanel.setAttribute('hidden', '');
+      qrPanel.setAttribute('hidden', '');
 
-  function handleWmFiles(files) {
+      if (selectedWatermarkType === 'text') {
+        textPanel.removeAttribute('hidden');
+        textInput.focus();
+      } else if (selectedWatermarkType === 'logo') {
+        logoPanel.removeAttribute('hidden');
+      } else if (selectedWatermarkType === 'qrcode') {
+        qrPanel.removeAttribute('hidden');
+      }
+
+      updateGenerateState();
+    });
+  });
+
+  // Logo dropzone
+  let logoDragCounter = 0;
+  logoDrop.addEventListener('dragenter', (e) => {
+    e.preventDefault();
+    logoDragCounter++;
+    logoDrop.classList.add('drag-over');
+  });
+  logoDrop.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+  });
+  logoDrop.addEventListener('dragleave', () => {
+    logoDragCounter--;
+    if (logoDragCounter <= 0) {
+      logoDragCounter = 0;
+      logoDrop.classList.remove('drag-over');
+    }
+  });
+  logoDrop.addEventListener('drop', (e) => {
+    e.preventDefault();
+    logoDragCounter = 0;
+    logoDrop.classList.remove('drag-over');
+    handleLogoFiles(e.dataTransfer.files);
+  });
+  logoDrop.addEventListener('click', () => logoInput.click());
+  logoInput.addEventListener('change', () => handleLogoFiles(logoInput.files));
+
+  function handleLogoFiles(files) {
     if (!files || !files.length) return;
     const file = files[0];
-    const types = ['image/png','image/jpeg'];
-    if (!types.includes(file.type)) return;
-    const obj = URL.createObjectURL(file);
-    watermarkPreviewImg.onload = () => URL.revokeObjectURL(obj);
-    watermarkPreviewImg.src = obj;
-    wmName.textContent = file.name;
-    wmSize.textContent = formatBytes(file.size);
-    watermarkPreview.hidden = false;
-    showWorkspace();
+    const acceptedTypes = ['image/png', 'image/jpeg'];
+    if (!acceptedTypes.includes(file.type)) return;
+
+    logoFile = file;
+    const objectUrl = URL.createObjectURL(file);
+    logoPreviewImg.onload = () => URL.revokeObjectURL(objectUrl);
+    logoPreviewImg.src = objectUrl;
+    logoPreview.removeAttribute('hidden');
     updateGenerateState();
   }
 
-  removeWmBtn.addEventListener('click', (e) => { e.stopPropagation(); watermarkInput.value=''; watermarkPreviewImg.src=''; watermarkPreview.hidden = true; updateGenerateState(); });
-
-  // Generate quantum key
-  genQuantumBtn.addEventListener('click', () => {
-    quantumKeyInput.value = generateHexKey(32);
+  removeLogoBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    logoFile = null;
+    logoInput.value = '';
+    logoPreviewImg.src = '';
+    logoPreview.setAttribute('hidden', '');
+    updateGenerateState();
   });
 
-  // Generate watermark button enabled only if both original + watermark exist
+  // Quantum key generation
+  genQuantumBtn.addEventListener('click', () => {
+    quantumKeyInput.value = generateHexKey(256);
+  });
+
+  // Generate state logic
   function hasOriginal() {
-    return !!(origSmallPreview && origSmallPreview.src && origSmallPreview.src.indexOf('data:')!==-1 || (origSmallPreview && origSmallPreview.src && origSmallPreview.src.startsWith('blob:')));
+    return origSmallPreview && origSmallPreview.src && (origSmallPreview.src.startsWith('blob:') || origSmallPreview.src.indexOf('data:') !== -1);
   }
-  function hasWatermark() {
-    return !!(watermarkPreviewImg && watermarkPreviewImg.src && (watermarkPreviewImg.src.startsWith('blob:') || watermarkPreviewImg.src.indexOf('data:')!==-1));
+
+  function hasWatermarkConfigured() {
+    if (!selectedWatermarkType) return false;
+    
+    if (selectedWatermarkType === 'text') {
+      return textInput.value.trim().length > 0;
+    } else if (selectedWatermarkType === 'logo') {
+      return logoFile !== null;
+    } else if (selectedWatermarkType === 'qrcode') {
+      return true; // Always configured for QR
+    }
+    return false;
+  }
+
+  function hasQuantumKey() {
+    return quantumKeyInput.value.trim().length > 0;
   }
 
   function updateGenerateState() {
-    const enabled = hasOriginal() && hasWatermark();
-    genBtn.disabled = !enabled;
-    if (enabled) genBtn.removeAttribute('aria-disabled'); else genBtn.setAttribute('aria-disabled','true');
+    const canGenerate = hasOriginal() && hasWatermarkConfigured() && hasQuantumKey();
+    generateBtn.disabled = !canGenerate;
+    generateBtn.setAttribute('aria-disabled', canGenerate ? 'false' : 'true');
   }
 
-
-  // Reset
+  // Reset workspace
   resetBtn.addEventListener('click', () => {
-    // Clear watermark
-    watermarkInput.value=''; watermarkPreviewImg.src=''; watermarkPreview.hidden=true;
-    // Clear original (clear small preview and left big preview)
-    if (origSmallPreview) { origSmallPreview.src = ''; }
-    if (origPreview) { origPreview.src = ''; }
+    // Clear original image
+    if (origSmallPreview) origSmallPreview.src = '';
+    if (origPreviewLarge) origPreviewLarge.src = '';
+
+    // Clear watermark type selection
+    typeRadios.forEach(r => r.checked = false);
+    selectedWatermarkType = null;
+    configSection.setAttribute('hidden', '');
+    textPanel.setAttribute('hidden', '');
+    logoPanel.setAttribute('hidden', '');
+    qrPanel.setAttribute('hidden', '');
+
+    // Clear text input
+    textInput.value = '';
+
+    // Clear logo
+    logoFile = null;
+    logoInput.value = '';
+    logoPreviewImg.src = '';
+    logoPreview.setAttribute('hidden', '');
+
+    // Reset strength to medium
+    strengthRadios.forEach(r => {
+      r.checked = r.value === 'medium';
+    });
+
     // Clear quantum key
-    if (quantumKeyInput) quantumKeyInput.value = '';
-    // Reset outputs
-    document.getElementById('outProtected').textContent = 'Not generated';
-    document.getElementById('outCert').textContent = 'Pending';
-    document.getElementById('mPsnr').textContent = '--';
-    document.getElementById('mSsim').textContent = '--';
-    document.getElementById('mEntropy').textContent = '--';
-    document.getElementById('mEmbeddingTime') && (document.getElementById('mEmbeddingTime').textContent = '--');
-    document.getElementById('mKeyLength') && (document.getElementById('mKeyLength').textContent = '--');
-    document.getElementById('mSecurity').textContent = 'Waiting...';
-    // Hide protected preview and success badge
-    const protectedPreviewEl = document.getElementById('protectedPreviewLarge');
-    const pwProtectedWrap = document.getElementById('pwProtected');
-    const pwSuccess = document.getElementById('pwSuccess');
-    if (protectedPreviewEl) protectedPreviewEl.src = '';
-    if (pwProtectedWrap) pwProtectedWrap.hidden = true;
-    if (pwSuccess) pwSuccess.hidden = true;
+    quantumKeyInput.value = '';
+
+    // Hide results
+    analyticsSection.setAttribute('hidden', '');
+    protectedSection.setAttribute('hidden', '');
+    if (protectedImage) protectedImage.src = '';
+    successBadge.setAttribute('hidden', '');
+
+    // Reset buttons
+    generateBtn.disabled = true;
+    downloadBtn.disabled = true;
+    generateBtn.setAttribute('aria-disabled', 'true');
+    downloadBtn.setAttribute('aria-disabled', 'true');
 
     // Re-enable upload controls
-    const dropzoneEl = document.getElementById('dropzone');
-    const watermarkDropEl = document.getElementById('watermarkDrop');
-    const imageInputEl = document.getElementById('imageInput');
-    const watermarkInputEl = document.getElementById('watermarkInput');
-    const removeImageBtnEl = document.getElementById('removeImageBtn');
-    const removeWmBtnEl = document.getElementById('removeWmBtn');
-    if (dropzoneEl) dropzoneEl.classList.remove('disabled');
-    if (watermarkDropEl) watermarkDropEl.classList.remove('disabled');
-    if (imageInputEl) imageInputEl.disabled = false;
-    if (watermarkInputEl) watermarkInputEl.disabled = false;
-    if (removeImageBtnEl) removeImageBtnEl.disabled = false;
-    if (removeWmBtnEl) removeWmBtnEl.disabled = false;
-
-    // Keep download disabled
-    if (downloadBtn) downloadBtn.disabled = true;
-    // Disable cert/qr
-    const genCertBtn = document.getElementById('genCertBtn');
-    const qrBtn = document.getElementById('qrBtn');
-    if (genCertBtn) genCertBtn.disabled = true;
-    if (qrBtn) qrBtn.disabled = true;
+    if (dropzone) dropzone.classList.remove('disabled');
+    if (imageInput) imageInput.disabled = false;
 
     updateGenerateState();
   });
 
-  // Utility: generate hex key
-  function generateHexKey(len) {
-    const arr = new Uint8Array(len/2);
+  // Generate watermark (processing simulation)
+  generateBtn.addEventListener('click', () => {
+    if (!hasOriginal() || !hasWatermarkConfigured() || !hasQuantumKey()) return;
+
+    runProcessing();
+  });
+
+  function runProcessing() {
+    overlay.removeAttribute('hidden');
+    successBadge.setAttribute('hidden', '');
+    downloadBtn.disabled = true;
+
+    const processingSteps = [
+      'Initializing...',
+      'Generating Quantum Key...',
+      'Embedding Watermark...',
+      'Running Quality Analysis...',
+      'Preparing Protected Image...',
+      'Completed Successfully'
+    ];
+
+    // Render steps
+    steps.innerHTML = '';
+    processingSteps.forEach((label, i) => {
+      const stepEl = document.createElement('div');
+      stepEl.className = 'pw-step';
+      stepEl.dataset.index = i;
+      stepEl.innerHTML = `
+        <div class="dot"><span class="check">✓</span></div>
+        <div class="label">${label}</div>
+      `;
+      steps.appendChild(stepEl);
+    });
+
+    // Disable upload controls
+    if (dropzone) dropzone.classList.add('disabled');
+    if (imageInput) imageInput.disabled = true;
+    typeRadios.forEach(r => r.disabled = true);
+    strengthRadios.forEach(r => r.disabled = true);
+    genQuantumBtn.disabled = true;
+    generateBtn.disabled = true;
+
+    // Durations sum to ~4200ms (about 4 seconds)
+    const durations = [600, 700, 800, 700, 600, 700];
+    let currentStep = 0;
+
+    function runStep(index) {
+      if (index >= processingSteps.length) {
+        finishProcessing();
+        return;
+      }
+
+      const stepEl = steps.children[index];
+      const dot = stepEl.querySelector('.dot');
+      const duration = durations[index];
+      const overlayNote = document.getElementById('pwOverlayNote');
+
+      overlayNote.textContent = processingSteps[index];
+
+      let start = null;
+      function animate(timestamp) {
+        if (!start) start = timestamp;
+        const progress = (timestamp - start) / duration;
+
+        if (progress >= 1) {
+          stepEl.classList.add('completed');
+          dot.innerHTML = '<span class="check">✓</span>';
+          setTimeout(() => runStep(index + 1), 200);
+        } else {
+          requestAnimationFrame(animate);
+        }
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    runStep(0);
+  }
+
+  function finishProcessing() {
+    setTimeout(() => {
+      overlay.setAttribute('hidden', '');
+      successBadge.removeAttribute('hidden');
+
+      // Show analytics
+      analyticsSection.removeAttribute('hidden');
+
+      // Show protected preview
+      if (origPreviewLarge && origPreviewLarge.src) {
+        protectedImage.src = origPreviewLarge.src;
+        protectedSection.removeAttribute('hidden');
+      }
+
+      // Enable download
+      downloadBtn.disabled = false;
+      downloadBtn.setAttribute('aria-disabled', 'false');
+
+      // Re-enable some controls
+      genQuantumBtn.disabled = false;
+      typeRadios.forEach(r => r.disabled = false);
+      strengthRadios.forEach(r => r.disabled = false);
+
+      // Add to history
+      addHistoryRecord();
+    }, 400);
+  }
+
+  // Download protected image
+  downloadBtn.addEventListener('click', () => {
+    if (!origPreviewLarge || !origPreviewLarge.src) return;
+
+    const canvas = document.createElement('canvas');
+    const img = new Image();
+    img.onload = () => {
+      canvas.width = img.naturalWidth || 800;
+      canvas.height = img.naturalHeight || 600;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+
+      // Apply watermark effect (simple overlay)
+      const strength = Array.from(strengthRadios).find(r => r.checked)?.value || 'medium';
+      const alphaMap = { low: 0.15, medium: 0.30, high: 0.45 };
+      ctx.globalAlpha = alphaMap[strength];
+      ctx.fillStyle = 'rgba(6, 182, 212, 0.5)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.globalAlpha = 1;
+
+      canvas.toBlob((blob) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'quantummark_protected_image.png';
+        document.body.appendChild(a);
+        a.click();
+        URL.revokeObjectURL(a.href);
+        a.remove();
+      }, 'image/png');
+    };
+    img.src = origPreviewLarge.src;
+  });
+
+  // Utility functions
+  function generateHexKey(bits) {
+    const bytes = bits / 8;
+    const arr = new Uint8Array(bytes);
     window.crypto.getRandomValues(arr);
-    return Array.from(arr).map(b => b.toString(16).padStart(2,'0')).join('');
+    return Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
   }
 
-  function formatBytes(bytes) {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 ** 2) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / 1024 ** 2).toFixed(1)} MB`;
+  function addHistoryRecord() {
+    try {
+      const history = JSON.parse(localStorage.getItem('qm_processing_history') || '[]');
+      const imageName = origSmallPreview ? (document.getElementById('previewName')?.textContent || 'Unknown') : 'Unknown';
+      history.unshift({
+        time: new Date().toLocaleString(),
+        image: imageName,
+        security: 'HIGH',
+        status: 'Success'
+      });
+      while (history.length > 5) history.pop();
+      localStorage.setItem('qm_processing_history', JSON.stringify(history));
+    } catch (e) {}
   }
 
-  // If user already has original preview, sync it in on load
+  // Initial sync
   setTimeout(syncOriginalPreview, 120);
 }
 
@@ -794,9 +1011,8 @@ function initMetricBars() {
       renderHistory();
     }
 
-    // initial render
-    renderHistory();
+    // initial render - history is now handled in initProtectWorkspace
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+  // Function removed - all functionality moved to initProtectWorkspace
 })();
