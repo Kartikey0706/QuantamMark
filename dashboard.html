@@ -530,6 +530,32 @@
                     <span class="pw-preview-label">Protected Image</span>
                     <div class="pw-preview-box">
                       <img id="pwPreviewProtected" alt="Protected image preview" />
+                      <img id="pwProtectedImage" hidden alt="Protected image output" />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="pw-verification-panel" id="pwVerificationPanel" hidden>
+                  <h4 class="pw-section-heading">Watermark Extraction & Verification</h4>
+                  <div class="pw-verification-grid">
+                    <div class="pw-verification-card">
+                      <span class="pw-verification-label">Extracted Text</span>
+                      <p id="pwExtractedText">-</p>
+                    </div>
+                    <div class="pw-verification-card">
+                      <span class="pw-verification-label">Verification Result</span>
+                      <p id="pwVerificationResult">Not verified</p>
+                    </div>
+                  </div>
+                  <div class="pw-verification-actions">
+                    <input type="text" id="pwVerifyTextInput" class="pw-text-input" placeholder="Expected watermark text" />
+                    <div class="pw-verification-buttons">
+                      <button type="button" class="btn btn-ghost btn-sm" id="pwExtractBtn">
+                        Extract Watermark
+                      </button>
+                      <button type="button" class="btn btn-primary btn-sm" id="pwVerifyBtn">
+                        Verify Ownership
+                      </button>
                     </div>
                   </div>
                 </div>

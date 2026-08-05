@@ -1,6 +1,6 @@
 """Flask application factory for QuantumMark backend."""
 import os
-from flask import Flask, jsonify
+from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
 
 
@@ -38,6 +38,15 @@ def create_app():
     @app.route("/health", methods=["GET"])
     def health():
         return jsonify({"status": "healthy"}), 200
+
+    @app.route('/processed/<path:filename>', methods=['GET'])
+    def processed_file(filename):
+        safe_name = os.path.basename(filename)
+        processed_dir = os.path.join(base, 'processed')
+        processed_path = os.path.join(processed_dir, safe_name)
+        if not os.path.isfile(processed_path):
+            return jsonify({'error': 'Processed file not found.'}), 404
+        return send_from_directory(processed_dir, safe_name)
 
     return app
 

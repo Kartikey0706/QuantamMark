@@ -402,6 +402,12 @@ function initProtectWorkspace() {
   const pwScoreValue = document.getElementById('pwScoreValue');
   const certificateBtn = document.getElementById('pwCertificateBtn');
   const qrBtn = document.getElementById('pwQrBtn');
+  const verificationPanel = document.getElementById('pwVerificationPanel');
+  const extractedText = document.getElementById('pwExtractedText');
+  const verificationResult = document.getElementById('pwVerificationResult');
+  const verifyTextInput = document.getElementById('pwVerifyTextInput');
+  const extractBtn = document.getElementById('pwExtractBtn');
+  const verifyBtn = document.getElementById('pwVerifyBtn');
 
   if (!workspace) return;
 
@@ -425,6 +431,13 @@ function initProtectWorkspace() {
 
   if (imageInput) {
     imageInput.addEventListener('change', () => {
+      syncOriginalPreview();
+    });
+  }
+
+  if (continueBtn) {
+    continueBtn.addEventListener('click', (e) => {
+      e.preventDefault();
       syncOriginalPreview();
     });
   }
@@ -570,6 +583,9 @@ function initProtectWorkspace() {
     // Hide results
     analyticsSection.setAttribute('hidden', '');
     protectedSection.setAttribute('hidden', '');
+    if (verificationPanel) verificationPanel.setAttribute('hidden', '');
+    if (extractedText) extractedText.textContent = '-';
+    if (verificationResult) verificationResult.textContent = 'Not verified';
     if (protectedImage) protectedImage.src = '';
     successBadge.setAttribute('hidden', '');
       if (pwCompareSlider) pwCompareSlider.setAttribute('hidden', '');
@@ -584,6 +600,9 @@ function initProtectWorkspace() {
     downloadBtn.disabled = true;
     generateBtn.setAttribute('aria-disabled', 'true');
     downloadBtn.setAttribute('aria-disabled', 'true');
+
+    // Clear backend file state
+    backendUploadDetails = null;
 
     // Re-enable upload controls
     if (dropzone) dropzone.classList.remove('disabled');
@@ -610,8 +629,29 @@ function initProtectWorkspace() {
       updateUploadProgress(percent, `Uploading image... ${percent}%`);
     })
       .then((payload) => {
-        updateUploadProgress(100, 'Image Uploaded Successfully');
+        updateUploadProgress(100, 'Image uploaded successfully.');
         backendUploadDetails = payload;
+
+        if (selectedWatermarkType !== 'text') {
+          throw new Error('Only text watermarking is supported in this version.');
+        }
+
+        return fetch('/watermark/embed', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            filename: backendUploadDetails.filename,
+            watermark_text: textInput.value.trim(),
+          }),
+        });
+      })
+      .then(async (response) => {
+        const body = await response.json();
+        if (!response.ok || !body.success) {
+          throw new Error(body.error || `Watermark embed failed with status ${response.status}`);
+        }
+        backendUploadDetails.protected = body;
+        updateUploadProgress(100, 'Watermark embedded successfully.');
         setTimeout(() => {
           hideUploadProgress();
         }, 1800);
@@ -705,7 +745,15 @@ function initProtectWorkspace() {
       analyticsSection.removeAttribute('hidden');
 
       // Show protected preview
-      if (origPreviewLarge && origPreviewLarge.src) {
+      if (backendUploadDetails?.protected?.processed_image) {
+        protectedImage.src = backendUploadDetails.protected.processed_image;
+        if (pwPreviewOriginal) pwPreviewOriginal.src = origPreviewLarge.src;
+        if (pwPreviewProtected) pwPreviewProtected.src = backendUploadDetails.protected.processed_image;
+        if (pwCompareOriginal) pwCompareOriginal.src = origPreviewLarge.src;
+        if (pwCompareProtected) pwCompareProtected.src = backendUploadDetails.protected.processed_image;
+        protectedSection.removeAttribute('hidden');
+        if (pwCompareSlider) pwCompareSlider.removeAttribute('hidden');
+      } else if (origPreviewLarge && origPreviewLarge.src) {
         protectedImage.src = origPreviewLarge.src;
         if (pwPreviewOriginal) pwPreviewOriginal.src = origPreviewLarge.src;
         if (pwPreviewProtected) pwPreviewProtected.src = origPreviewLarge.src;
@@ -715,6 +763,7 @@ function initProtectWorkspace() {
         if (pwCompareSlider) pwCompareSlider.removeAttribute('hidden');
       }
 
+      if (verificationPanel) verificationPanel.removeAttribute('hidden');
       if (pwTimelineSection) pwTimelineSection.removeAttribute('hidden');
       if (certificateBtn) {
         certificateBtn.disabled = false;
@@ -732,6 +781,10 @@ function initProtectWorkspace() {
       // Enable download
       downloadBtn.disabled = false;
       downloadBtn.setAttribute('aria-disabled', 'false');
+
+      // Add extraction defaults
+      if (extractedText) extractedText.textContent = '-';
+      if (verificationResult) verificationResult.textContent = 'Not verified';
 
       // Re-enable some controls
       genQuantumBtn.disabled = false;
@@ -925,6 +978,66 @@ function initProtectWorkspace() {
     });
   }
 
+  if (extractBtn) {
+    extractBtn.addEventListener('click', () => {
+      if (!backendUploadDetails?.protected?.processed_filename) {
+        updateUploadProgress(0, 'Protected image is not available for extraction.');
+        return;
+      }
+
+      fetch('/watermark/extract', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename: backendUploadDetails.protected.processed_filename }),
+      })
+        .then(async (response) => {
+          const body = await response.json();
+          if (!response.ok || !body.success) {
+            throw new Error(body.error || `Extraction failed with status ${response.status}`);
+          }
+          if (extractedText) extractedText.textContent = body.watermark || '-';
+          if (verificationResult) verificationResult.textContent = 'Extraction successful';
+        })
+        .catch((error) => {
+          if (extractedText) extractedText.textContent = '-';
+          if (verificationResult) verificationResult.textContent = error.message || 'Extraction failed';
+        });
+    });
+  }
+
+  if (verifyBtn) {
+    verifyBtn.addEventListener('click', () => {
+      if (!backendUploadDetails?.protected?.processed_filename) {
+        updateUploadProgress(0, 'Protected image is not available for verification.');
+        return;
+      }
+      const expected = verifyTextInput?.value.trim();
+      if (!expected) {
+        if (verificationResult) verificationResult.textContent = 'Expected text is required.';
+        return;
+      }
+
+      fetch('/watermark/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename: backendUploadDetails.protected.processed_filename, expected_text: expected }),
+      })
+        .then(async (response) => {
+          const body = await response.json();
+          if (!response.ok || !body.success) {
+            throw new Error(body.error || `Verification failed with status ${response.status}`);
+          }
+          if (extractedText) extractedText.textContent = body.extracted || '-';
+          if (verificationResult) {
+            verificationResult.textContent = body.verified ? 'Owner Verified ✅' : 'Verification Failed ❌';
+          }
+        })
+        .catch((error) => {
+          if (verificationResult) verificationResult.textContent = error.message || 'Verification failed';
+        });
+    });
+  }
+
   // Initial sync
   setTimeout(syncOriginalPreview, 120);
 }
@@ -1020,276 +1133,4 @@ function initMetricBars() {
 }
 
 
-/* ============================================================
-   8b. Processing simulation & history
-   ============================================================ */
-(function attachProcessingFeatures(){
-  // Wait until DOM is ready (should already be) then wire up elements
-  function init() {
-    const genBtn = document.getElementById('genBtn');
-    const pwOverlay = document.getElementById('pwOverlay');
-    const pwSteps = document.getElementById('pwSteps');
-    const pwOverlayNote = document.getElementById('pwOverlayNote');
-    const pwSuccess = document.getElementById('pwSuccess');
-    const downloadBtn = document.getElementById('downloadBtn');
-    const outProtected = document.getElementById('outProtected');
-    const outCert = document.getElementById('outCert');
-    const outQr = document.getElementById('outQr');
-    const mPsnr = document.getElementById('mPsnr');
-    const mSsim = document.getElementById('mSsim');
-    const mEntropy = document.getElementById('mEntropy');
-    const mSecurity = document.getElementById('mSecurity');
-    const historyList = document.getElementById('historyList');
-    const previewNameEl = document.getElementById('previewName');
-    const quantumKeyInput = document.getElementById('quantumKey');
 
-    if (!genBtn || !pwOverlay || !pwSteps) return;
-
-    const steps = [
-      'Initializing...',
-      'Generating Quantum Random Key...',
-      'Embedding Invisible Watermark...',
-      'Running Image Quality Analysis...',
-      'Preparing Protected Image...',
-      'Completed Successfully'
-    ];
-
-    function renderSteps() {
-      pwSteps.innerHTML = '';
-      steps.forEach((label,i) => {
-        const stepEl = document.createElement('div');
-        stepEl.className = 'pw-step';
-        stepEl.dataset.index = i;
-        stepEl.innerHTML = `
-          <div class="dot"><span class="check">✓</span></div>
-          <div class="label">${label}</div>
-          <div class="bar"><div class="fill"></div></div>
-        `;
-        pwSteps.appendChild(stepEl);
-      });
-    }
-
-    function showOverlay() { pwOverlay.hidden = false; pwOverlay.setAttribute('aria-hidden','false'); }
-    function hideOverlay() { pwOverlay.hidden = true; pwOverlay.setAttribute('aria-hidden','true'); }
-
-    function runSimulation() {
-      renderSteps();
-      showOverlay();
-      pwSuccess.hidden = true;
-      let total = 0;
-      // durations roughly sum to ~4300-4800ms (total ~4.5s)
-      const durations = [500, 800, 900, 800, 600, 600];
-      // disable upload controls while processing
-      const dropzoneEl = document.getElementById('dropzone');
-      const watermarkDropEl = document.getElementById('watermarkDrop');
-      const imageInputEl = document.getElementById('imageInput');
-      const watermarkInputEl = document.getElementById('watermarkInput');
-      const removeImageBtnEl = document.getElementById('removeImageBtn');
-      const removeWmBtnEl = document.getElementById('removeWmBtn');
-      if (dropzoneEl) dropzoneEl.classList.add('disabled');
-      if (watermarkDropEl) watermarkDropEl.classList.add('disabled');
-      if (imageInputEl) imageInputEl.disabled = true;
-      if (watermarkInputEl) watermarkInputEl.disabled = true;
-      if (removeImageBtnEl) removeImageBtnEl.disabled = true;
-      if (removeWmBtnEl) removeWmBtnEl.disabled = true;
-      const elems = Array.from(pwSteps.querySelectorAll('.pw-step'));
-
-      function runStep(i) {
-        if (i >= elems.length) {
-          finishProcessing();
-          return;
-        }
-        const el = elems[i];
-        const fill = el.querySelector('.fill');
-        const duration = durations[i];
-        pwOverlayNote.textContent = el.querySelector('.label').textContent;
-        // animate fill from 0 to 100%
-        let start = null;
-        function frame(ts) {
-          if (!start) start = ts;
-          const progress = Math.min(1, (ts - start) / duration);
-          fill.style.width = (progress * 100) + '%';
-          if (progress < 1) {
-            requestAnimationFrame(frame);
-          } else {
-            // mark completed
-            el.classList.add('completed');
-            // show check
-            const dot = el.querySelector('.dot');
-            dot.innerHTML = '<span class="check">✓</span>';
-            setTimeout(() => runStep(i+1), 220);
-          }
-        }
-        requestAnimationFrame(frame);
-      }
-
-      runStep(0);
-    }
-
-    function finishProcessing() {
-      // hide overlay after short pause
-      setTimeout(() => {
-        hideOverlay();
-        pwSuccess.hidden = false;
-
-        // update sample metrics (latest requested values)
-        mPsnr.textContent = '42.83 dB';
-        mSsim.textContent = '0.994';
-        mEntropy.textContent = '7.89';
-        mSecurity.textContent = 'HIGH';
-        // embedding time and key length
-        const embedTimeEl = document.getElementById('mEmbeddingTime');
-        if (embedTimeEl) embedTimeEl.textContent = '0.41 s';
-        const keyLenEl = document.getElementById('mKeyLength');
-        if (keyLenEl) keyLenEl.textContent = '256-bit';
-
-        // show protected preview (use original as placeholder)
-        const origImg = document.getElementById('origPreviewLarge');
-        const protectedPreviewEl = document.getElementById('protectedPreviewLarge');
-        const pwProtectedWrap = document.getElementById('pwProtected');
-        if (origImg && protectedPreviewEl) {
-          protectedPreviewEl.src = origImg.src || '';
-          if (pwProtectedWrap) pwProtectedWrap.hidden = false;
-        }
-
-        // Enable outputs
-        if (downloadBtn) downloadBtn.disabled = false;
-        if (outProtected) outProtected.textContent = 'Protected Image Available';
-        if (outCert) outCert.textContent = 'Ready';
-        if (outQr) outQr.textContent = 'Available';
-        // enable cert + qr buttons if present
-        const genCertBtn = document.getElementById('genCertBtn');
-        const qrBtn = document.getElementById('qrBtn');
-        if (genCertBtn) genCertBtn.disabled = false;
-        if (qrBtn) qrBtn.disabled = false;
-
-        // Add to processing history
-        addHistoryRecord({
-          time: new Date().toLocaleString(),
-          image: (previewNameEl && previewNameEl.textContent) ? previewNameEl.textContent : 'Unknown',
-          security: 'HIGH',
-          status: 'Success'
-        });
-      }, 420);
-    }
-
-    // On click: validate and run
-
-    // On click: validate and run
-    genBtn.addEventListener('click', (e) => {
-      // validate original + watermark
-      const origOk = !!document.getElementById('previewImage') && document.getElementById('previewImage').src;
-      const wmOk = !!document.getElementById('watermarkPreviewImg') && document.getElementById('watermarkPreviewImg').src;
-      if (!origOk || !wmOk) return; // guard; button should be disabled otherwise
-      runSimulation();
-    });
-
-    // Download will produce a simple composite canvas (original + watermark blended) so users can download a protected image
-    if (downloadBtn) {
-      downloadBtn.addEventListener('click', () => {
-        // Compose canvas from original and watermark
-        const origImg = document.getElementById('origPreviewLarge');
-        const wmImg = document.getElementById('watermarkPreviewImg');
-        if (!origImg || !wmImg || !origImg.src || !wmImg.src) return;
-        const canvas = document.createElement('canvas');
-        const w = origImg.naturalWidth || 800;
-        const h = origImg.naturalHeight || 600;
-        canvas.width = w; canvas.height = h;
-        const ctx = canvas.getContext('2d');
-        // draw original
-        ctx.drawImage(origImg, 0, 0, w, h);
-        // draw watermark scaled to 25% width and centered with alpha depending on strength input
-        const wmStrength = document.getElementById('wmStrength');
-        const alpha = wmStrength ? (0.4 * (wmStrength.value / 100) + 0.2) : 0.4; // between 0.2-0.6
-        const targetW = Math.floor(w * 0.25);
-        const aspect = (wmImg.naturalWidth && wmImg.naturalHeight) ? (wmImg.naturalHeight / wmImg.naturalWidth) : 1;
-        const targetH = Math.floor(targetW * aspect);
-        const x = Math.floor((w - targetW)/2);
-        const y = Math.floor((h - targetH)/2);
-        ctx.globalAlpha = alpha;
-        ctx.drawImage(wmImg, x, y, targetW, targetH);
-        ctx.globalAlpha = 1;
-        canvas.toBlob((blob) => {
-          const a = document.createElement('a');
-          a.href = URL.createObjectURL(blob);
-          a.download = 'quantummark_protected.png';
-          document.body.appendChild(a);
-          a.click();
-          URL.revokeObjectURL(a.href);
-          a.remove();
-        }, 'image/png');
-      });
-    }
-
-    // Certificate and QR handlers
-    const genCertBtnEl = document.getElementById('genCertBtn');
-    const qrBtnEl = document.getElementById('qrBtn');
-    if (genCertBtnEl) {
-      genCertBtnEl.addEventListener('click', () => {
-        // create a simple certificate text and trigger download
-        const previewName = (previewNameEl && previewNameEl.textContent) ? previewNameEl.textContent : 'Unknown';
-        const key = quantumKeyInput ? quantumKeyInput.value : '';
-        const certText = `QuantumMark Ownership Certificate\n\nImage: ${previewName}\nTime: ${new Date().toLocaleString()}\nSecurity Level: HIGH\nKey: ${key || 'N/A'}\nSignature: (simulated)`;
-        const blob = new Blob([certText], { type: 'text/plain' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'quantummark_certificate.txt';
-        document.body.appendChild(a);
-        a.click();
-        URL.revokeObjectURL(a.href);
-        a.remove();
-        const outCertEl = document.getElementById('outCert'); if (outCertEl) outCertEl.textContent = 'Certificate Generated';
-      });
-    }
-    if (qrBtnEl) {
-      qrBtnEl.addEventListener('click', () => {
-        const previewName = (previewNameEl && previewNameEl.textContent) ? previewNameEl.textContent : 'Unknown';
-        const qrData = `QM-VERIFY|${previewName}|${new Date().toISOString()}|SEC=HIGH`;
-        const blob = new Blob([qrData], { type: 'text/plain' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'quantummark_qr_verification.txt';
-        document.body.appendChild(a);
-        a.click();
-        URL.revokeObjectURL(a.href);
-        a.remove();
-        const outQrEl = document.getElementById('outQr'); if (outQrEl) outQrEl.textContent = 'Available';
-      });
-    }
-
-    // Processing history localStorage
-    function loadHistory() {
-      try {
-        const raw = localStorage.getItem('qm_processing_history');
-        return raw ? JSON.parse(raw) : [];
-      } catch (e) { return []; }
-    }
-    function saveHistory(arr) {
-      try { localStorage.setItem('qm_processing_history', JSON.stringify(arr)); } catch(e){}
-    }
-    function renderHistory() {
-      const rows = loadHistory();
-      historyList.innerHTML = '';
-      if (!rows.length) {
-        historyList.innerHTML = '<div class="history-empty">No processing history yet</div>';
-        return;
-      }
-      rows.forEach(r => {
-        const el = document.createElement('div'); el.className='history-row';
-        el.innerHTML = `<div class="time">${r.time}</div><div class="name">${r.image}</div><div class="status">${r.status}</div><div class="sec">${r.security}</div>`;
-        historyList.appendChild(el);
-      });
-    }
-    function addHistoryRecord(rec) {
-      const arr = loadHistory();
-      arr.unshift(rec);
-      while (arr.length > 5) arr.pop();
-      saveHistory(arr);
-      renderHistory();
-    }
-
-    // initial render - history is now handled in initProtectWorkspace
-  }
-
-  // Function removed - all functionality moved to initProtectWorkspace
-})();

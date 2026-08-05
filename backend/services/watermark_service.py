@@ -97,8 +97,8 @@ def embed_lsb_watermark(filename: str, watermark_text: str) -> Dict[str, object]
         capacity = _calculate_capacity(normalized_image)
         if len(bits) > capacity:
             raise ValueError(
-                f"Watermark too large for image capacity ({len(bits)} bits available, "
-                f"requires {capacity} bits)."
+                f"Watermark too large for image capacity ({capacity} bits available, "
+                f"requires {len(bits)} bits)."
             )
 
         protected_image = _embed_bits_in_image(normalized_image, bits)
@@ -108,8 +108,66 @@ def embed_lsb_watermark(filename: str, watermark_text: str) -> Dict[str, object]
     protected_image.save(processed_path, format="PNG")
 
     return {
-        "processed_image": os.path.join("backend", "processed", processed_filename).replace("\\", "/"),
+        "processed_image": f"/processed/{processed_filename}",
+        "processed_filename": processed_filename,
         "algorithm": "LSB",
         "watermark_length": len(payload),
         "embedded_bits": len(bits),
     }
+
+def extract_lsb_watermark(filename: str) -> dict:
+    """Extract an LSB watermark from a processed image file."""
+    if not filename or not isinstance(filename, str):
+        raise ValueError("Filename must be a non-empty string.")
+
+    safe_name = os.path.basename(filename)
+    _ensure_directories()
+    protected_path = os.path.join(PROCESSED_DIR, safe_name)
+    if not os.path.isfile(protected_path):
+        raise FileNotFoundError("Protected image not found.")
+
+    delimiter_bytes = DELIMITER.encode("utf-8")
+    extracted_bytes = bytearray()
+    current_byte = 0
+    bit_count = 0
+
+    try:
+        with Image.open(protected_path) as image:
+            normalized_image = _normalize_image(image)
+            pixels = normalized_image.load()
+            width, height = normalized_image.size
+
+            for y in range(height):
+                for x in range(width):
+                    pixel = pixels[x, y]
+                    for channel in range(3):
+                        current_byte = (current_byte << 1) | (pixel[channel] & 1)
+                        bit_count += 1
+                        if bit_count == 8:
+                            extracted_bytes.append(current_byte)
+                            bit_count = 0
+                            current_byte = 0
+
+                            if len(extracted_bytes) >= len(delimiter_bytes) and extracted_bytes[-len(delimiter_bytes):] == delimiter_bytes:
+                                payload_bytes = extracted_bytes[:-len(delimiter_bytes)]
+                                try:
+                                    watermark = payload_bytes.decode("utf-8")
+                                except UnicodeDecodeError as exc:
+                                    raise ValueError("Corrupted watermark: invalid UTF-8 sequence.") from exc
+
+                                return {
+                                    "success": True,
+                                    "watermark": watermark,
+                                    "algorithm": "LSB",
+                                }
+    except OSError as exc:
+        raise ValueError("Invalid image file.") from exc
+
+    raise ValueError("No embedded watermark found.")
+
+def create_watermark(filename: str, watermark_text: str):
+    """
+    Backward compatibility wrapper.
+    Existing code can still call create_watermark().
+    """
+    return embed_lsb_watermark(filename, watermark_text)
