@@ -301,6 +301,18 @@ function initProtectWorkspace() {
   const continueBtn = document.getElementById('continueBtn');
   const imageInput = document.getElementById('imageInput');
   const dropzone = document.getElementById('dropzone');
+  const pwPreviewOriginal = document.getElementById('pwPreviewOriginal');
+  const pwPreviewProtected = document.getElementById('pwPreviewProtected');
+  const pwCompareOriginal = document.getElementById('pwCompareOriginal');
+  const pwCompareProtected = document.getElementById('pwCompareProtected');
+  const pwCompareSlider = document.getElementById('pwCompareSlider');
+  const pwCompareOverlay = document.getElementById('pwCompareOverlay');
+  const pwCompareHandle = document.getElementById('pwCompareHandle');
+  const pwTimelineSection = document.getElementById('pwTimelineSection');
+  const pwScoreRing = document.getElementById('pwScoreRing');
+  const pwScoreValue = document.getElementById('pwScoreValue');
+  const certificateBtn = document.getElementById('pwCertificateBtn');
+  const qrBtn = document.getElementById('pwQrBtn');
 
   if (!workspace) return;
 
@@ -471,8 +483,14 @@ function initProtectWorkspace() {
     protectedSection.setAttribute('hidden', '');
     if (protectedImage) protectedImage.src = '';
     successBadge.setAttribute('hidden', '');
-
-    // Reset buttons
+      if (pwCompareSlider) pwCompareSlider.setAttribute('hidden', '');
+      if (pwTimelineSection) pwTimelineSection.setAttribute('hidden', '');
+      if (pwScoreRing) pwScoreRing.style.setProperty('--score', 0);
+      if (pwScoreValue) pwScoreValue.textContent = '0';
+      if (certificateBtn) certificateBtn.disabled = true;
+      if (certificateBtn) certificateBtn.setAttribute('aria-disabled', 'true');
+      if (qrBtn) qrBtn.disabled = true;
+      if (qrBtn) qrBtn.setAttribute('aria-disabled', 'true');
     generateBtn.disabled = true;
     downloadBtn.disabled = true;
     generateBtn.setAttribute('aria-disabled', 'true');
@@ -575,8 +593,27 @@ function initProtectWorkspace() {
       // Show protected preview
       if (origPreviewLarge && origPreviewLarge.src) {
         protectedImage.src = origPreviewLarge.src;
+        if (pwPreviewOriginal) pwPreviewOriginal.src = origPreviewLarge.src;
+        if (pwPreviewProtected) pwPreviewProtected.src = origPreviewLarge.src;
+        if (pwCompareOriginal) pwCompareOriginal.src = origPreviewLarge.src;
+        if (pwCompareProtected) pwCompareProtected.src = origPreviewLarge.src;
         protectedSection.removeAttribute('hidden');
+        if (pwCompareSlider) pwCompareSlider.removeAttribute('hidden');
       }
+
+      if (pwTimelineSection) pwTimelineSection.removeAttribute('hidden');
+      if (certificateBtn) {
+        certificateBtn.disabled = false;
+        certificateBtn.setAttribute('aria-disabled', 'false');
+      }
+      if (qrBtn) {
+        qrBtn.disabled = false;
+        qrBtn.setAttribute('aria-disabled', 'false');
+      }
+
+      animateMetrics();
+      animateSecurityScore(96);
+      setComparePosition(0.5);
 
       // Enable download
       downloadBtn.disabled = false;
@@ -590,6 +627,47 @@ function initProtectWorkspace() {
       // Add to history
       addHistoryRecord();
     }, 400);
+  }
+
+  // Comparison slider interaction
+  if (pwCompareSlider && pwCompareHandle && pwCompareOverlay) {
+    let dragging = false;
+
+    function setComparePosition(ratio) {
+      const clamped = Math.min(1, Math.max(0, ratio));
+      pwCompareOverlay.style.width = `${clamped * 100}%`;
+      pwCompareHandle.style.left = `calc(${clamped * 100}% - 16px)`;
+    }
+
+    function updateCompareFromEvent(event) {
+      const rect = pwCompareSlider.getBoundingClientRect();
+      const x = event.clientX !== undefined ? event.clientX : event.touches[0].clientX;
+      const ratio = (x - rect.left) / rect.width;
+      setComparePosition(ratio);
+    }
+
+    pwCompareHandle.addEventListener('pointerdown', (event) => {
+      dragging = true;
+      event.preventDefault();
+      pwCompareHandle.setPointerCapture(event.pointerId);
+    });
+
+    pwCompareSlider.addEventListener('pointermove', (event) => {
+      if (!dragging) return;
+      updateCompareFromEvent(event);
+    });
+
+    pwCompareSlider.addEventListener('pointerup', () => {
+      dragging = false;
+    });
+
+    pwCompareSlider.addEventListener('pointerleave', () => {
+      dragging = false;
+    });
+
+    pwCompareSlider.addEventListener('click', (event) => {
+      updateCompareFromEvent(event);
+    });
   }
 
   // Download protected image
@@ -625,7 +703,64 @@ function initProtectWorkspace() {
     img.src = origPreviewLarge.src;
   });
 
-  // Utility functions
+  function animateMetrics() {
+    if (!analyticsSection) return;
+    const metrics = [
+      { id: 'pwMetricPSNR', start: 0, end: 42.81, fixed: 2, suffix: ' dB' },
+      { id: 'pwMetricSSIM', start: 0, end: 0.993, fixed: 3, suffix: '' },
+      { id: 'pwMetricEntropy', start: 0, end: 7.91, fixed: 2, suffix: '' },
+      { id: 'pwMetricTime', start: 0, end: 0.42, fixed: 2, suffix: ' s' }
+    ];
+
+    metrics.forEach((metric, index) => {
+      const el = document.getElementById(metric.id);
+      if (!el) return;
+      const duration = 900;
+      const startTime = performance.now() + index * 120;
+      function step(now) {
+        const elapsed = now - startTime;
+        if (elapsed < 0) {
+          requestAnimationFrame(step);
+          return;
+        }
+        const progress = Math.min(1, elapsed / duration);
+        const value = metric.start + (metric.end - metric.start) * progress;
+        el.textContent = value.toFixed(metric.fixed) + metric.suffix;
+        if (progress < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    });
+
+    const revealGroup = analyticsSection.querySelector('.reveal-group');
+    if (revealGroup) {
+      revealGroup.classList.add('visible');
+    }
+  }
+
+  function animateSecurityScore(value) {
+    if (!pwScoreRing || !pwScoreValue) return;
+    const target = Math.min(100, Math.max(0, value));
+    const duration = 1200;
+    const startTime = performance.now();
+
+    function step(now) {
+      const progress = Math.min(1, (now - startTime) / duration);
+      const currentScore = Math.round(target * progress);
+      pwScoreValue.textContent = currentScore;
+      pwScoreRing.style.setProperty('--score', currentScore);
+      if (progress < 1) requestAnimationFrame(step);
+    }
+
+    requestAnimationFrame(step);
+  }
+
+  function setComparePosition(ratio) {
+    if (!pwCompareOverlay || !pwCompareHandle) return;
+    const clamped = Math.min(1, Math.max(0, ratio));
+    pwCompareOverlay.style.width = `${clamped * 100}%`;
+    pwCompareHandle.style.left = `calc(${clamped * 100}% - 16px)`;
+  }
+
   function generateHexKey(bits) {
     const bytes = bits / 8;
     const arr = new Uint8Array(bytes);
@@ -646,6 +781,34 @@ function initProtectWorkspace() {
       while (history.length > 5) history.pop();
       localStorage.setItem('qm_processing_history', JSON.stringify(history));
     } catch (e) {}
+  }
+
+  // Certificate and QR button placeholders
+  if (certificateBtn) {
+    certificateBtn.addEventListener('click', () => {
+      const a = document.createElement('a');
+      const text = `QuantumMark Certificate\nImage: ${document.getElementById('previewName')?.textContent || 'Unknown'}\nStatus: Secure\nScore: 96/100`;
+      const blob = new Blob([text], { type: 'text/plain' });
+      a.href = URL.createObjectURL(blob);
+      a.download = 'quantummark_certificate.txt';
+      document.body.appendChild(a);
+      a.click();
+      URL.revokeObjectURL(a.href);
+      a.remove();
+    });
+  }
+  if (qrBtn) {
+    qrBtn.addEventListener('click', () => {
+      const a = document.createElement('a');
+      const text = `QM-QR|${document.getElementById('previewName')?.textContent || 'Unknown'}|SCORE:96`;
+      const blob = new Blob([text], { type: 'text/plain' });
+      a.href = URL.createObjectURL(blob);
+      a.download = 'quantummark_qr.txt';
+      document.body.appendChild(a);
+      a.click();
+      URL.revokeObjectURL(a.href);
+      a.remove();
+    });
   }
 
   // Initial sync

@@ -475,22 +475,34 @@
               <!-- ---- ANALYTICS & RESULTS ---- -->
               <div class="pw-analytics-section" id="pwAnalyticsSection" hidden>
                 <h3 class="pw-section-heading">Protected Image Analytics</h3>
-                <div class="pw-analytics-grid">
+                <div class="pw-score-card">
+                  <div class="pw-score-ring" id="pwScoreRing" style="--score:0;">
+                    <div class="pw-score-inner">
+                      <span class="pw-score-value" id="pwScoreValue">0</span>
+                      <span class="pw-score-total">/100</span>
+                    </div>
+                  </div>
+                  <div class="pw-score-meta">
+                    <span class="pw-score-label">Security Score</span>
+                    <span class="pw-score-status">Excellent Protection</span>
+                  </div>
+                </div>
+                <div class="pw-analytics-grid reveal-group">
                   <div class="pw-metric-card">
                     <span class="pw-metric-label">PSNR</span>
-                    <span class="pw-metric-value" id="pwMetricPSNR">42.81 dB</span>
+                    <span class="pw-metric-value" id="pwMetricPSNR" data-final="42.81">0<span class="pw-metric-unit"> dB</span></span>
                   </div>
                   <div class="pw-metric-card">
                     <span class="pw-metric-label">SSIM</span>
-                    <span class="pw-metric-value" id="pwMetricSSIM">0.993</span>
+                    <span class="pw-metric-value" id="pwMetricSSIM" data-final="0.993">0<span class="pw-metric-unit"> </span></span>
                   </div>
                   <div class="pw-metric-card">
                     <span class="pw-metric-label">Entropy</span>
-                    <span class="pw-metric-value" id="pwMetricEntropy">7.91</span>
+                    <span class="pw-metric-value" id="pwMetricEntropy" data-final="7.91">0<span class="pw-metric-unit"> </span></span>
                   </div>
                   <div class="pw-metric-card">
                     <span class="pw-metric-label">Embedding Time</span>
-                    <span class="pw-metric-value" id="pwMetricTime">0.42 s</span>
+                    <span class="pw-metric-value" id="pwMetricTime" data-final="0.42">0<span class="pw-metric-unit"> s</span></span>
                   </div>
                   <div class="pw-metric-card">
                     <span class="pw-metric-label">Security Level</span>
@@ -503,12 +515,60 @@
                 </div>
               </div>
 
-              <!-- ---- PROTECTED IMAGE PREVIEW ---- -->
+              <!-- ---- PROTECTED IMAGE PREVIEW AND COMPARISON ---- -->
               <div class="pw-protected-section" id="pwProtectedSection" hidden>
-                <h3 class="pw-section-heading">Protected Image</h3>
-                <div class="pw-protected-preview">
-                  <img id="pwProtectedImage" alt="Protected image preview" />
+                <h3 class="pw-section-heading">Image Comparison</h3>
+
+                <div class="pw-preview-pair">
+                  <div class="pw-preview-card">
+                    <span class="pw-preview-label">Original Image</span>
+                    <div class="pw-preview-box">
+                      <img id="pwPreviewOriginal" alt="Original image preview" />
+                    </div>
+                  </div>
+                  <div class="pw-preview-card">
+                    <span class="pw-preview-label">Protected Image</span>
+                    <div class="pw-preview-box">
+                      <img id="pwPreviewProtected" alt="Protected image preview" />
+                    </div>
+                  </div>
                 </div>
+
+                <div class="pw-compare-slider" id="pwCompareSlider" hidden>
+                  <div class="pw-compare-frame">
+                    <img id="pwCompareOriginal" alt="Before image preview" />
+                    <div class="pw-compare-overlay" id="pwCompareOverlay">
+                      <img id="pwCompareProtected" alt="After image preview" />
+                    </div>
+                    <button type="button" class="pw-compare-handle" id="pwCompareHandle" aria-label="Image comparison slider"></button>
+                  </div>
+                  <div class="pw-compare-caption">
+                    <span>Original</span>
+                    <span>Protected</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="pw-timeline-section" id="pwTimelineSection" hidden>
+                <h3 class="pw-section-heading">Processing Timeline</h3>
+                <ol class="pw-timeline-list">
+                  <li class="pw-timeline-step">
+                    <span class="pw-timeline-check">✓</span>
+                    <span>Image Uploaded</span>
+                  </li>
+                  <li class="pw-timeline-step">
+                    <span class="pw-timeline-check">✓</span>
+                    <span>Quantum Key Generated</span>
+                  </li>
+                  <li class="pw-timeline-step">
+                    <span class="pw-timeline-check">✓</span>
+                    <span>Watermark Embedded</span>
+                  </li>
+                  <li class="pw-timeline-step">
+                    <span class="pw-timeline-check">✓</span>
+                    <span>Security Analysis Completed</span>
+                  </li>
+                </ol>
               </div>
 
               <!-- ---- ACTION BUTTONS ---- -->
@@ -527,6 +587,14 @@
                   <button type="button" class="btn btn-primary" id="pwDownloadBtn" disabled>
                     <i data-lucide="download"></i>
                     Download Protected Image
+                  </button>
+                  <button type="button" class="btn btn-ghost btn-sm" id="pwCertificateBtn" disabled>
+                    <i data-lucide="file-text"></i>
+                    Generate Certificate
+                  </button>
+                  <button type="button" class="btn btn-ghost btn-sm" id="pwQrBtn" disabled>
+                    <i data-lucide="qrcode"></i>
+                    Generate QR
                   </button>
                 </div>
               </div>
