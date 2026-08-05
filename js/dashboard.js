@@ -52,6 +52,84 @@ function initIcons() {
   }
 }
 
+let uploadProgressElement = null;
+let uploadStatusElement = null;
+let selectedUploadedFile = null;
+
+function createUploadProgressElements(dropzone) {
+  const progress = document.createElement('progress');
+  progress.id = 'uploadProgress';
+  progress.max = 100;
+  progress.value = 0;
+  progress.hidden = true;
+  progress.className = 'dropzone-progress';
+
+  const status = document.createElement('div');
+  status.id = 'uploadStatus';
+  status.hidden = true;
+  status.className = 'dropzone-status';
+  status.setAttribute('aria-live', 'polite');
+
+  const inner = dropzone.querySelector('.dropzone-inner');
+  if (inner) {
+    inner.appendChild(progress);
+    inner.appendChild(status);
+  }
+
+  uploadProgressElement = progress;
+  uploadStatusElement = status;
+}
+
+function updateUploadProgress(value, message) {
+  if (!uploadProgressElement || !uploadStatusElement) return;
+  uploadProgressElement.hidden = false;
+  uploadProgressElement.value = value;
+  uploadStatusElement.hidden = false;
+  uploadStatusElement.textContent = message;
+}
+
+function hideUploadProgress() {
+  if (!uploadProgressElement || !uploadStatusElement) return;
+  uploadProgressElement.hidden = true;
+  uploadProgressElement.value = 0;
+  uploadStatusElement.hidden = true;
+  uploadStatusElement.textContent = '';
+}
+
+function uploadImageToBackend(file, onProgress) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    const formData = new FormData();
+    formData.append('image', file);
+
+    xhr.open('POST', '/upload');
+    xhr.responseType = 'json';
+
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        onProgress(Math.round((event.loaded / event.total) * 100));
+      }
+    };
+
+    xhr.onload = () => {
+      const payload = xhr.response || {};
+      if (xhr.status >= 200 && xhr.status < 300) {
+        if (payload.success) {
+          onProgress(100);
+          resolve(payload);
+          return;
+        }
+      }
+      const error = payload.error || `Upload failed with status ${xhr.status}`;
+      reject(new Error(error));
+    };
+
+    xhr.onerror = () => reject(new Error('Network error during upload.'));
+    xhr.onabort = () => reject(new Error('Upload aborted.'));
+    xhr.send(formData);
+  });
+}
+
 
 /* ============================================================
    2 & 3. Sidebar — mobile toggle + active link state
@@ -163,6 +241,9 @@ function initDropzone() {
     return;
   }
 
+  let selectedFile = null;
+  createUploadProgressElements(dropzone);
+
   let dragCounter = 0; // track nested drag events
 
   function togglePreview(visible) {
@@ -197,6 +278,10 @@ function initDropzone() {
       return;
     }
 
+    selectedUploadedFile = file;
+    selectedFile = file;
+    hideUploadProgress();
+
     const objectUrl = URL.createObjectURL(file);
     const img = new Image();
     img.src = objectUrl;
@@ -221,7 +306,10 @@ function initDropzone() {
 
   function resetSelection() {
     fileInput.value = '';
+    selectedUploadedFile = null;
+    selectedFile = null;
     togglePreview(false);
+    hideUploadProgress();
   }
 
   dropzone.addEventListener('dragenter', (e) => {
@@ -275,6 +363,7 @@ function initProtectWorkspace() {
   const workspace = document.getElementById('protectWorkspace');
   const origPreviewLarge = document.getElementById('origPreviewLarge');
   const origSmallPreview = document.getElementById('previewImage');
+  let backendUploadDetails = null;
   const typeRadios = document.querySelectorAll('input[name="pwWatermarkType"]');
   const configSection = document.getElementById('pwConfigSection');
   const textPanel = document.getElementById('pwTextPanel');
@@ -507,7 +596,32 @@ function initProtectWorkspace() {
   generateBtn.addEventListener('click', () => {
     if (!hasOriginal() || !hasWatermarkConfigured() || !hasQuantumKey()) return;
 
-    runProcessing();
+    const file = selectedUploadedFile || imageInput?.files?.[0];
+    if (!file) {
+      updateUploadProgress(0, 'Please select an image before continuing.');
+      return;
+    }
+
+    generateBtn.disabled = true;
+    generateBtn.setAttribute('aria-disabled', 'true');
+    updateUploadProgress(0, 'Uploading image to server...');
+
+    uploadImageToBackend(file, (percent) => {
+      updateUploadProgress(percent, `Uploading image... ${percent}%`);
+    })
+      .then((payload) => {
+        updateUploadProgress(100, 'Image Uploaded Successfully');
+        backendUploadDetails = payload;
+        setTimeout(() => {
+          hideUploadProgress();
+        }, 1800);
+        runProcessing();
+      })
+      .catch((error) => {
+        updateUploadProgress(0, `Upload failed: ${error.message || 'Please try again.'}`);
+        generateBtn.disabled = false;
+        generateBtn.setAttribute('aria-disabled', 'false');
+      });
   });
 
   function runProcessing() {
