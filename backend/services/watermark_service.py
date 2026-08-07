@@ -115,15 +115,24 @@ def embed_lsb_watermark(filename: str, watermark_text: str) -> Dict[str, object]
         "embedded_bits": len(bits),
     }
 
-def extract_lsb_watermark(filename: str) -> dict:
+def extract_lsb_watermark(image_path: str) -> dict:
     """Extract an LSB watermark from a processed image file."""
-    if not filename or not isinstance(filename, str):
-        raise ValueError("Filename must be a non-empty string.")
+    if not image_path or not isinstance(image_path, str):
+        raise ValueError("Image path must be a non-empty string.")
 
-    safe_name = os.path.basename(filename)
+    safe_name = os.path.basename(image_path)
     _ensure_directories()
-    protected_path = os.path.join(PROCESSED_DIR, safe_name)
-    if not os.path.isfile(protected_path):
+
+    candidate_paths = []
+    if os.path.isabs(image_path) and os.path.isfile(image_path):
+        candidate_paths.append(image_path)
+    else:
+        if os.path.isfile(image_path):
+            candidate_paths.append(image_path)
+        candidate_paths.append(os.path.join(PROCESSED_DIR, safe_name))
+
+    protected_path = next((path for path in candidate_paths if os.path.isfile(path)), None)
+    if not protected_path:
         raise FileNotFoundError("Protected image not found.")
 
     delimiter_bytes = DELIMITER.encode("utf-8")
