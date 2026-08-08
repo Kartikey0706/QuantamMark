@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>QuantumMark Verification</title>
+    <script src="js/api.js"></script>
     <style>
       body { font-family: Arial, sans-serif; margin: 0; background: #07111f; color: #f5f7ff; }
       .card { max-width: 720px; margin: 48px auto; padding: 24px; background: #101c31; border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
@@ -34,14 +35,17 @@
       const params = new URLSearchParams(window.location.search);
       const verificationId = params.get('id');
       const status = document.getElementById('status');
+      const { apiJson } = window.QuantumMarkAPI || {};
       if (!verificationId) {
         status.textContent = 'VERIFICATION FAILED ❌';
         status.className = 'pill fail';
+      } else if (!apiJson) {
+        status.textContent = 'VERIFICATION FAILED ❌';
+        status.className = 'pill fail';
       } else {
-        fetch(`/certificate/verify/${encodeURIComponent(verificationId)}`)
-          .then(async (response) => {
-            const body = await response.json();
-            if (!response.ok || !body.success || !body.verified) {
+        apiJson(`/certificate/verify/${encodeURIComponent(verificationId)}`)
+          .then(({ body }) => {
+            if (!body.success || !body.verified) {
               status.textContent = 'VERIFICATION FAILED ❌';
               status.className = 'pill fail';
               return;

@@ -11,7 +11,18 @@
  * 7. Animate metric bar fills on first reveal
  */
 
+const { API_BASE_URL, apiUrl, apiJson, apiHealth } = window.QuantumMarkAPI || {};
+
+if (!API_BASE_URL || !apiUrl || !apiJson || !apiHealth) {
+  throw new Error('QuantumMark API helpers are not available.');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+
+  // Backend health check (non-blocking)
+  void apiHealth().catch((error) => {
+    console.warn('QuantumMark backend health check failed:', error?.message || error);
+  });
 
   // 1. Render all Lucide icons
   initIcons();
@@ -111,7 +122,7 @@ function uploadImageToBackend(file, onProgress) {
     const formData = new FormData();
     formData.append('image', file);
 
-    xhr.open('POST', '/upload');
+    xhr.open('POST', apiUrl('/upload'));
     xhr.responseType = 'json';
 
     xhr.upload.onprogress = (event) => {
@@ -651,7 +662,7 @@ function initProtectWorkspace() {
           throw new Error('Only text watermarking is supported in this version.');
         }
 
-        return fetch('/watermark/embed', {
+        return apiJson('/watermark/embed', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -660,9 +671,8 @@ function initProtectWorkspace() {
           }),
         });
       })
-      .then(async (response) => {
-        const body = await response.json();
-        if (!response.ok || !body.success) {
+      .then(async ({ response, body }) => {
+        if (!body.success) {
           throw new Error(body.error || `Watermark embed failed with status ${response.status}`);
         }
         backendUploadDetails.protected = body;
@@ -672,7 +682,7 @@ function initProtectWorkspace() {
           hideUploadProgress();
         }, 1800);
 
-        const metricsResponse = await fetch('/metrics', {
+        const { body: metricsBody } = await apiJson('/metrics', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -680,8 +690,7 @@ function initProtectWorkspace() {
             processed_filename: body.processed_filename,
           }),
         });
-        const metricsBody = await metricsResponse.json();
-        if (metricsResponse.ok && metricsBody.success) {
+        if (metricsBody.success) {
           backendUploadDetails.metrics = metricsBody;
         }
         runProcessing();
@@ -1040,14 +1049,13 @@ function initProtectWorkspace() {
         return;
       }
 
-      fetch('/watermark/extract', {
+      apiJson('/watermark/extract', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ filename: backendUploadDetails.protected.processed_filename }),
       })
-        .then(async (response) => {
-          const body = await response.json();
-          if (!response.ok || !body.success) {
+        .then(({ response, body }) => {
+          if (!body.success) {
             throw new Error(body.error || `Extraction failed with status ${response.status}`);
           }
           if (extractedText) extractedText.textContent = body.watermark || '-';
@@ -1072,14 +1080,13 @@ function initProtectWorkspace() {
         return;
       }
 
-      fetch('/watermark/verify', {
+      apiJson('/watermark/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ filename: backendUploadDetails.protected.processed_filename, expected_text: expected }),
       })
-        .then(async (response) => {
-          const body = await response.json();
-          if (!response.ok || !body.success) {
+        .then(({ response, body }) => {
+          if (!body.success) {
             throw new Error(body.error || `Verification failed with status ${response.status}`);
           }
           if (extractedText) extractedText.textContent = body.extracted || '-';
@@ -1110,13 +1117,12 @@ function initQuantumSecurity() {
   generateBtn.addEventListener('click', async () => {
     sourceLabel.textContent = 'Generating...';
     try {
-      const response = await fetch('/qrng/key', {
+      const { body } = await apiJson('/qrng/key', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ length: defaultLength }),
       });
-      const body = await response.json();
-      if (!response.ok || !body.success) {
+      if (!body.success) {
         throw new Error(body.error || 'Key generation failed.');
       }
       sourceLabel.textContent = body.source === 'quantum_simulator' ? 'Quantum Simulator' : 'Secure Fallback';
@@ -1146,13 +1152,12 @@ function initCertificateWorkflow() {
 
     status.textContent = 'Generating certificate...';
     try {
-      const response = await fetch('/certificate/generate', {
+      const { body } = await apiJson('/certificate/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ protected_filename: protectedFilename, watermark }),
       });
-      const body = await response.json();
-      if (!response.ok || !body.success) {
+      if (!body.success) {
         throw new Error(body.error || 'Certificate generation failed.');
       }
       verificationId.textContent = body.verification_id || '-';
@@ -1211,13 +1216,12 @@ function initAttackLab() {
 
     setStatus('Applying attack...');
     try {
-      const response = await fetch('/attacks/apply', {
+      const { body } = await apiJson('/attacks/apply', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ filename, attack: attackSelect.value }),
       });
-      const body = await response.json();
-      if (!response.ok || !body.success) {
+      if (!body.success) {
         throw new Error(body.error || 'Attack could not be applied.');
       }
       setStatus(`Applied ${body.attack}`);
@@ -1236,7 +1240,7 @@ function initAttackLab() {
 
     setStatus('Running robustness test...');
     try {
-      const response = await fetch('/attacks/test', {
+      const { body } = await apiJson('/attacks/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1245,8 +1249,7 @@ function initAttackLab() {
           attack: attackSelect.value,
         }),
       });
-      const body = await response.json();
-      if (!response.ok || !body.success) {
+      if (!body.success) {
         throw new Error(body.error || 'Robustness test failed.');
       }
       setStatus(`Tested ${body.attack}`);
