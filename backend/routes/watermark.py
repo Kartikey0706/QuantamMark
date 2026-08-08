@@ -3,6 +3,7 @@ import os
 from flask import Blueprint, request, jsonify, current_app
 
 from ..services.watermark_service import embed_lsb_watermark, extract_lsb_watermark
+from ..services.metrics_service import calculate_metrics
 
 watermark_bp = Blueprint("watermark", __name__)
 

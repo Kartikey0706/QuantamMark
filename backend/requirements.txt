@@ -5,3 +5,5 @@ Pillow
 numpy
 scikit-image
 qiskit
+qrcode
+

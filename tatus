@@ -1,0 +1,327 @@
+warning: in the working copy of 'dashboard.html', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'js/dashboard.js', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/backend/app.py b/backend/app.py[m
+[1mindex 6f6de9a..cfc139d 100644[m
+[1m--- a/backend/app.py[m
+[1m+++ b/backend/app.py[m
+[36m@@ -25,11 +25,17 @@[m [mdef create_app():[m
+     from .routes.watermark import watermark_bp[m
+     from .routes.verify import verify_bp[m
+     from .routes.attacks import attacks_bp[m
+[32m+[m[32m    from .routes.certificate import certificate_bp[m
+[32m+[m[32m    from .routes.metrics import metrics_bp[m
+[32m+[m[32m    from .routes.qrng import qrng_bp[m
+ [m
+     app.register_blueprint(upload_bp)[m
+     app.register_blueprint(watermark_bp)[m
+     app.register_blueprint(verify_bp)[m
+     app.register_blueprint(attacks_bp)[m
+[32m+[m[32m    app.register_blueprint(metrics_bp)[m
+[32m+[m[32m    app.register_blueprint(qrng_bp)[m
+[32m+[m[32m    app.register_blueprint(certificate_bp)[m
+ [m
+     @app.route("/", methods=["GET"])[m
+     def index():[m
+[36m@@ -41,8 +47,11 @@[m [mdef create_app():[m
+ [m
+     @app.route('/processed/<path:filename>', methods=['GET'])[m
+     def processed_file(filename):[m
+[31m-        safe_name = os.path.basename(filename)[m
+         processed_dir = os.path.join(base, 'processed')[m
+[32m+[m[32m        safe_name = os.path.normpath(filename)[m
+[32m+[m[32m        if safe_name in {'.', '..'} or safe_name.startswith('..'):[m
+[32m+[m[32m            return jsonify({'error': 'Invalid processed file path.'}), 400[m
+[32m+[m
+         processed_path = os.path.join(processed_dir, safe_name)[m
+         if not os.path.isfile(processed_path):[m
+             return jsonify({'error': 'Processed file not found.'}), 404[m
+[1mdiff --git a/backend/requirements.txt b/backend/requirements.txt[m
+[1mindex 1d81aa7..a3e8ec5 100644[m
+[1m--- a/backend/requirements.txt[m
+[1m+++ b/backend/requirements.txt[m
+[36m@@ -5,3 +5,5 @@[m [mPillow[m
+ numpy[m
+ scikit-image[m
+ qiskit[m
+[32m+[m[32mqrcode[m
+[41m+[m
+[1mdiff --git a/backend/routes/__init__.py b/backend/routes/__init__.py[m
+[1mindex 753010c..449b11b 100644[m
+[1m--- a/backend/routes/__init__.py[m
+[1m+++ b/backend/routes/__init__.py[m
+[36m@@ -4,5 +4,8 @@[m [mfrom .upload import upload_bp[m
+ from .watermark import watermark_bp[m
+ from .verify import verify_bp[m
+ from .attacks import attacks_bp[m
+[32m+[m[32mfrom .certificate import certificate_bp[m
+[32m+[m[32mfrom .metrics import metrics_bp[m
+[32m+[m[32mfrom .qrng import qrng_bp[m
+ [m
+[31m-__all__ = ["upload_bp", "watermark_bp", "verify_bp", "attacks_bp"][m
+[32m+[m[32m__all__ = ["upload_bp", "watermark_bp", "verify_bp", "attacks_bp", "metrics_bp", "qrng_bp", "certificate_bp"][m
+[1mdiff --git a/backend/routes/attacks.py b/backend/routes/attacks.py[m
+[1mindex c118d6d..f07e068 100644[m
+[1m--- a/backend/routes/attacks.py[m
+[1m+++ b/backend/routes/attacks.py[m
+[36m@@ -1,13 +1,57 @@[m
+[31m-"""Attack lab routes (placeholder)."""[m
+[31m-from flask import Blueprint, jsonify[m
+[32m+[m[32m"""Attack lab routes for Sprint 8."""[m
+[32m+[m[32mfrom flask import Blueprint, current_app, jsonify, request[m
+[32m+[m
+[32m+[m[32mfrom ..services.attack_service import apply_attack, test_attack[m
+ [m
+ attacks_bp = Blueprint("attacks", __name__)[m
+ [m
+ [m
+[31m-@attacks_bp.route("/attacks", methods=["GET", "POST"])[m
+[31m-def attacks_stub():[m
+[31m-    """Placeholder endpoint for attack lab feature.[m
+[32m+[m[32m@attacks_bp.route("/attacks/apply", methods=["POST"])[m
+[32m+[m[32mdef apply_attack_route():[m
+[32m+[m[32m    """Create an attacked copy of a protected image."""[m
+[32m+[m[32m    try:[m
+[32m+[m[32m        data = request.get_json(silent=True) or {}[m
+[32m+[m[32m        filename = data.get("filename")[m
+[32m+[m[32m        attack = data.get("attack")[m
+[32m+[m
+[32m+[m[32m        if not filename:[m
+[32m+[m[32m            return jsonify({"success": False, "error": "Filename is required."}), 400[m
+[32m+[m[32m        if not attack:[m
+[32m+[m[32m            return jsonify({"success": False, "error": "Attack is required."}), 400[m
+[32m+[m
+[32m+[m[32m        result = apply_attack(filename, attack)[m
+[32m+[m[32m        return jsonify(result), 200[m
+[32m+[m[32m    except FileNotFoundError:[m
+[32m+[m[32m        return jsonify({"success": False, "error": "Protected image not found."}), 404[m
+[32m+[m[32m    except ValueError as exc:[m
+[32m+[m[32m        return jsonify({"success": False, "error": str(exc)}), 400[m
+[32m+[m[32m    except Exception:[m
+[32m+[m[32m        current_app.logger.exception("Error applying attack")[m
+[32m+[m[32m        return jsonify({"success": False, "error": "Internal server error."}), 500[m
+[32m+[m
+[32m+[m
+[32m+[m[32m@attacks_bp.route("/attacks/test", methods=["POST"])[m
+[32m+[m[32mdef test_attack_route():[m
+[32m+[m[32m    """Apply an attack and test whether the watermark survives."""[m
+[32m+[m[32m    try:[m
+[32m+[m[32m        data = request.get_json(silent=True) or {}[m
+[32m+[m[32m        filename = data.get("filename")[m
+[32m+[m[32m        watermark = data.get("watermark")[m
+[32m+[m[32m        attack = data.get("attack")[m
+[32m+[m
+[32m+[m[32m        if not filename:[m
+[32m+[m[32m            return jsonify({"success": False, "error": "Filename is required."}), 400[m
+[32m+[m[32m        if not watermark:[m
+[32m+[m[32m            return jsonify({"success": False, "error": "Watermark is required."}), 400[m
+[32m+[m[32m        if not attack:[m
+[32m+[m[32m            return jsonify({"success": False, "error": "Attack is required."}), 400[m
+ [m
+[31m-    Not implemented in this sprint.[m
+[31m-    """[m
+[31m-    return jsonify({"error": "Attacks lab not implemented in this sprint."}), 501[m
+[32m+[m[32m        result = test_attack(filename, watermark, attack)[m
+[32m+[m[32m        return jsonify(result), 200[m
+[32m+[m[32m    except FileNotFoundError:[m
+[32m+[m[32m        return jsonify({"success": False, "error": "Protected image not found."}), 404[m
+[32m+[m[32m    except ValueError as exc:[m
+[32m+[m[32m        return jsonify({"success": False, "error": str(exc)}), 400[m
+[32m+[m[32m    except Exception:[m
+[32m+[m[32m        current_app.logger.exception("Error testing attack")[m
+[32m+[m[32m        return jsonify({"success": False, "error": "Internal server error."}), 500[m
+[1mdiff --git a/backend/routes/verify.py b/backend/routes/verify.py[m
+[1mindex 37dcccd..cc99e47 100644[m
+[1m--- a/backend/routes/verify.py[m
+[1m+++ b/backend/routes/verify.py[m
+[36m@@ -1,13 +1,42 @@[m
+[31m-"""Verification routes (placeholder)."""[m
+[31m-from flask import Blueprint, jsonify[m
+[32m+[m[32m"""Verification routes for watermark verification."""[m
+[32m+[m[32mfrom flask import Blueprint, current_app, jsonify, request[m
+[32m+[m
+[32m+[m[32mfrom ..services.watermark_service import extract_lsb_watermark[m
+ [m
+ verify_bp = Blueprint("verify", __name__)[m
+ [m
+ [m
+ @verify_bp.route("/verify", methods=["GET", "POST"])[m
+ def verify_stub():[m
+[31m-    """Placeholder endpoint for verification feature.[m
+[32m+[m[32m    """Verify a protected image against an expected watermark string."""[m
+[32m+[m[32m    try:[m
+[32m+[m[32m        if request.method == "GET":[m
+[32m+[m[32m            data = request.args.to_dict(flat=True)[m
+[32m+[m[32m        else:[m
+[32m+[m[32m            data = request.get_json(silent=True) or {}[m
+[32m+[m
+[32m+[m[32m        filename = data.get("filename")[m
+[32m+[m[32m        expected_text = data.get("expected_text") or data.get("watermark_text")[m
+[32m+[m
+[32m+[m[32m        if not filename:[m
+[32m+[m[32m            return jsonify({"success": False, "error": "Filename is required."}), 400[m
+[32m+[m[32m        if not expected_text:[m
+[32m+[m[32m            return jsonify({"success": False, "error": "Expected text is required."}), 400[m
+[32m+[m
+[32m+[m[32m        result = extract_lsb_watermark(filename)[m
+[32m+[m[32m        verified = result.get("watermark") == expected_text[m
+[32m+[m
+[32m+[m[32m        return jsonify({[m
+[32m+[m[32m            "success": True,[m
+[32m+[m[32m            "verified": verified,[m
+[32m+[m[32m            "extracted": result.get("watermark"),[m
+[32m+[m[32m            "filename": filename,[m
+[32m+[m[32m        }), 200[m
+ [m
+[31m-    Not implemented in this sprint.[m
+[31m-    """[m
+[31m-    return jsonify({"error": "Verification not implemented in this sprint."}), 501[m
+[32m+[m[32m    except FileNotFoundError:[m
+[32m+[m[32m        return jsonify({"success": False, "error": "Protected image not found."}), 404[m
+[32m+[m[32m    except ValueError as exc:[m
+[32m+[m[32m        return jsonify({"success": False, "error": str(exc)}), 400[m
+[32m+[m[32m    except Exception:[m
+[32m+[m[32m        current_app.logger.exception("Error verifying watermark")[m
+[32m+[m[32m        return jsonify({"success": False, "error": "Internal server error."}), 500[m
+[1mdiff --git a/backend/routes/watermark.py b/backend/routes/watermark.py[m
+[1mindex 8090846..527b154 100644[m
+[1m--- a/backend/routes/watermark.py[m
+[1m+++ b/backend/routes/watermark.py[m
+[36m@@ -3,6 +3,7 @@[m [mimport os[m
+ from flask import Blueprint, request, jsonify, current_app[m
+ [m
+ from ..services.watermark_service import embed_lsb_watermark, extract_lsb_watermark[m
+[32m+[m[32mfrom ..services.metrics_service import calculate_metrics[m
+ [m
+ watermark_bp = Blueprint("watermark", __name__)[m
+ [m
+[1mdiff --git a/backend/services/metrics_service.py b/backend/services/metrics_service.py[m
+[1mindex 572f158..f15614e 100644[m
+[1m--- a/backend/services/metrics_service.py[m
+[1m+++ b/backend/services/metrics_service.py[m
+[36m@@ -1,6 +1,131 @@[m
+[31m-"""Placeholder metrics service for future sprints."""[m
+[32m+[m[32m"""Sprint 7 metrics service for image quality and watermark capacity analysis."""[m
+[32m+[m
+[32m+[m[32mimport math[m
+[32m+[m[32mimport os[m
+[32m+[m[32mfrom typing import Dict, Optional[m
+[32m+[m
+[32m+[m[32mimport numpy as np[m
+[32m+[m[32mfrom PIL import Image[m
+[32m+[m[32mfrom skimage.metrics import structural_similarity as ssim_metric[m
+[32m+[m
+[32m+[m[32mBASE_DIR = os.path.dirname(os.path.abspath(__file__))[m
+[32m+[m[32mUPLOADS_DIR = os.path.join(os.path.dirname(BASE_DIR), "uploads")[m
+[32m+[m[32mPROCESSED_DIR = os.path.join(os.path.dirname(BASE_DIR), "processed")[m
+[32m+[m
+[32m+[m
+[32m+[m[32mdef _ensure_image_path(path: str) -> str:[m
+[32m+[m[32m    if not path or not isinstance(path, str):[m
+[32m+[m[32m        raise ValueError("Image path must be a non-empty string.")[m
+[32m+[m
+[32m+[m[32m    resolved = os.path.abspath(path)[m
+[32m+[m[32m    if os.path.isfile(resolved):[m
+[32m+[m[32m        return resolved[m
+[32m+[m
+[32m+[m[32m    if os.path.isfile(os.path.join(UPLOADS_DIR, os.path.basename(path))):[m
+[32m+[m[32m        return os.path.join(UPLOADS_DIR, os.path.basename(path))[m
+[32m+[m
+[32m+[m[32m    if os.path.isfile(os.path.join(PROCESSED_DIR, os.path.basename(path))):[m
+[32m+[m[32m        return os.path.join(PROCESSED_DIR, os.path.basename(path))[m
+[32m+[m
+[32m+[m[32m    raise FileNotFoundError("Image file not found.")[m
+[32m+[m
+[32m+[m
+[32m+[m[32mdef _load_image(path: str) -> Image.Image:[m
+[32m+[m[32m    resolved = _ensure_image_path(path)[m
+[32m+[m[32m    try:[m
+[32m+[m[32m        with Image.open(resolved) as image:[m
+[32m+[m[32m            return image.convert("RGB")[m
+[32m+[m[32m    except (ValueError, OSError) as exc:[m
+[32m+[m[32m        raise ValueError("Invalid image file.") from exc[m
+[32m+[m
+[32m+[m
+[32m+[m[32mdef _image_entropy(image: Image.Image) -> float:[m
+[32m+[m[32m    grayscale = np.array(image.convert("L"), dtype=np.uint8)[m
+[32m+[m[32m    hist, _ = np.histogram(grayscale, bins=256, range=(0, 256))[m
+[32m+[m[32m    hist = hist[hist > 0][m
+[32m+[m[32m    probabilities = hist / hist.sum()[m
+[32m+[m[32m    return float(-np.sum(probabilities * np.log2(probabilities)))[m
+[32m+[m
+[32m+[m
+[32m+[m[32mdef _calculate_psnr(original: Image.Image, processed: Image.Image) -> float:[m
+[32m+[m[32m    if original.size != processed.size:[m
+[32m+[m[32m        raise ValueError("Original and processed images must have the same dimensions.")[m
+[32m+[m
+[32m+[m[32m    original_array = np.array(original, dtype=np.float64)[m
+[32m+[m[32m    processed_array = np.array(processed, dtype=np.float64)[m
+[32m+[m[32m    mse = np.mean((original_array - processed_array) ** 2)[m
+[32m+[m[32m    if mse == 0:[m
+[32m+[m[32m        return float("inf")[m
+[32m+[m[32m    return float(10.0 * math.log10((255.0 ** 2) / mse))[m
+[32m+[m
+[32m+[m
+[32m+[m[32mdef _calculate_ssim(original: Image.Image, processed: Image.Image) -> float:[m
+[32m+[m[32m    if original.size != processed.size:[m
+[32m+[m[32m        raise ValueError("Original and processed images must have the same dimensions.")[m
+[32m+[m
+[32m+[m[32m    original_array = np.array(original, dtype=np.float64)[m
+[32m+[m[32m    processed_array = np.array(processed, dtype=np.float64)[m
+[32m+[m[32m    min_dimension = min(original_array.shape[0], original_array.shape[1])[m
+[32m+[m[32m    win_size = min(7, min_dimension if min_dimension % 2 == 1 else min_dimension - 1)[m
+[32m+[m[32m    if win_size < 3:[m
+[32m+[m[32m        win_size = 3[m
+[32m+[m[32m    return float([m
+[32m+[m[32m        ssim_metric([m
+[32m+[m[32m            original_array,[m
+[32m+[m[32m            processed_array,[m
+[32m+[m[32m            data_range=255.0,[m
+[32m+[m[32m            win_size=win_size,[m
+[32m+[m[32m            channel_axis=-1,[m
+[32m+[m[32m        )[m
+[32m+[m[32m    )[m
+[32m+[m
+[32m+[m
+[32m+[m[32mdef _watermark_bits(watermark_text: str, delimiter: str = "<<<END>>>") -> int:[m
+[32m+[m[32m    payload = f"{watermark_text}{delimiter}"[m
+[32m+[m[32m    encoded = payload.encode("utf-8")[m
+[32m+[m[32m    return len(encoded) * 8[m
+[32m+[m
+[32m+[m
+[32m+[m[32mdef calculate_metrics([m
+[32m+[m[32m    original_path: str,[m
+[32m+[m[32m    processed_path: str,[m
+[32m+[m[32m    watermark_text: Optional[str] = None,[m
+[32m+[m[32m    embedding_time_ms: Optional[float] = None,[m
+[32m+[m[32m) -> Dict[str, float]:[m
+[32m+[m[32m    """Calculate PSNR, SSIM, entropy, embedding time, and capacity usage metrics."""[m
+[32m+[m[32m    original_image = _load_image(original_path)[m
+[32m+[m[32m    processed_image = _load_image(processed_path)[m
+[32m+[m
+[32m+[m[32m    psnr = _calculate_psnr(original_image, processed_image)[m
+[32m+[m[32m    ssim = _calculate_ssim(original_image, processed_image)[m
+[32m+[m[32m    entropy = _image_entropy(processed_image)[m
+[32m+[m
+[32m+[m[32m    width, height = processed_image.size[m
+[32m+[m[32m    capacity_bits = width * height * 3[m
+[32m+[m
+[32m+[m[32m    watermark_length = 0[m
+[32m+[m[32m    embedded_bits = 0[m
+[32m+[m[32m    capacity_used_percent = 0.0[m
+[32m+[m
+[32m+[m[32m    if watermark_text:[m
+[32m+[m[32m        watermark_length = len(f"{watermark_text}<<<END>>>")[m
+[32m+[m[32m        embedded_bits = _watermark_bits(watermark_text)[m
+[32m+[m[32m        if capacity_bits > 0:[m
+[32m+[m[32m            capacity_used_percent = min(100.0, (embedded_bits / capacity_bits) * 100.0)[m
+[32m+[m
+[32m+[m[32m    return {[m
+[32m+[m[32m        "psnr": psnr,[m
+[32m+[m[32m        "ssim": ssim,[m
+[32m+[m[32m        "entropy": entropy,[m
+[32m+[m[32m        "embedding_time_ms": float(embedding_time_ms or 0.0),[m
+[32m+[m[32m        "watermark_length": watermark_length,[m
+[32m+[m[32m        "embedded_bits": embedded_bits,[m
+[32m+[m[32m        "capacity_bits": capacity_bits,[m
+[32m+[m[32m        "capacity_used_percent": capacity_used_percent,[m
+[32m+[m[32m   

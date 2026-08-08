@@ -1,9 +1,12 @@
 """Watermark service for Sprint 5: Least Significant Bit embedding."""
 
 import os
+import time
 from typing import Dict, List, Tuple
 
 from PIL import Image
+
+from .metrics_service import calculate_metrics
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOADS_DIR = os.path.join(os.path.dirname(BASE_DIR), "uploads")
@@ -92,6 +95,7 @@ def embed_lsb_watermark(filename: str, watermark_text: str) -> Dict[str, object]
 
     payload, bits = _watermark_text_to_bits(watermark_text)
 
+    start_time = time.perf_counter()
     with Image.open(upload_path) as image:
         normalized_image = _normalize_image(image)
         capacity = _calculate_capacity(normalized_image)
@@ -107,12 +111,21 @@ def embed_lsb_watermark(filename: str, watermark_text: str) -> Dict[str, object]
     processed_path = os.path.join(PROCESSED_DIR, processed_filename)
     protected_image.save(processed_path, format="PNG")
 
+    embedding_time_ms = round((time.perf_counter() - start_time) * 1000, 3)
+    metrics_payload = calculate_metrics(upload_path, processed_path, watermark_text=watermark_text, embedding_time_ms=embedding_time_ms)
+
     return {
         "processed_image": f"/processed/{processed_filename}",
         "processed_filename": processed_filename,
         "algorithm": "LSB",
         "watermark_length": len(payload),
         "embedded_bits": len(bits),
+        "embedding_time_ms": metrics_payload["embedding_time_ms"],
+        "psnr": metrics_payload["psnr"],
+        "ssim": metrics_payload["ssim"],
+        "entropy": metrics_payload["entropy"],
+        "capacity_bits": metrics_payload["capacity_bits"],
+        "capacity_used_percent": metrics_payload["capacity_used_percent"],
     }
 
 def extract_lsb_watermark(image_path: str) -> dict:

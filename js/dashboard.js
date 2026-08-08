@@ -34,6 +34,15 @@ document.addEventListener('DOMContentLoaded', () => {
   // 8. Protect workspace initialisation
   initProtectWorkspace();
 
+  // 9. Attack Lab initialisation
+  initAttackLab();
+
+  // 10. Quantum security initialisation
+  initQuantumSecurity();
+
+  // 11. Certificate initialisation
+  initCertificateWorkflow();
+
 });
 
 
@@ -382,6 +391,11 @@ function initProtectWorkspace() {
   const resetBtn = document.getElementById('pwResetBtn');
   const downloadBtn = document.getElementById('pwDownloadBtn');
   const analyticsSection = document.getElementById('pwAnalyticsSection');
+  const metricPSNR = document.getElementById('pwMetricPSNR');
+  const metricSSIM = document.getElementById('pwMetricSSIM');
+  const metricEntropy = document.getElementById('pwMetricEntropy');
+  const metricTime = document.getElementById('pwMetricTime');
+  const metricCapacity = document.getElementById('pwMetricSecurity');
   const protectedSection = document.getElementById('pwProtectedSection');
   const protectedImage = document.getElementById('pwProtectedImage');
   const overlay = document.getElementById('pwOverlay');
@@ -603,6 +617,7 @@ function initProtectWorkspace() {
 
     // Clear backend file state
     backendUploadDetails = null;
+    window.__quantummarkProtectedFilename = null;
 
     // Re-enable upload controls
     if (dropzone) dropzone.classList.remove('disabled');
@@ -651,10 +666,24 @@ function initProtectWorkspace() {
           throw new Error(body.error || `Watermark embed failed with status ${response.status}`);
         }
         backendUploadDetails.protected = body;
+        window.__quantummarkProtectedFilename = body.processed_filename;
         updateUploadProgress(100, 'Watermark embedded successfully.');
         setTimeout(() => {
           hideUploadProgress();
         }, 1800);
+
+        const metricsResponse = await fetch('/metrics', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            original_filename: backendUploadDetails.filename,
+            processed_filename: body.processed_filename,
+          }),
+        });
+        const metricsBody = await metricsResponse.json();
+        if (metricsResponse.ok && metricsBody.success) {
+          backendUploadDetails.metrics = metricsBody;
+        }
         runProcessing();
       })
       .catch((error) => {
@@ -774,6 +803,7 @@ function initProtectWorkspace() {
         qrBtn.setAttribute('aria-disabled', 'false');
       }
 
+      updateMetricCards(backendUploadDetails?.metrics || null);
       animateMetrics();
       animateSecurityScore(96);
       setComparePosition(0.5);
@@ -870,19 +900,44 @@ function initProtectWorkspace() {
     img.src = origPreviewLarge.src;
   });
 
+  function updateMetricCards(metrics) {
+    const psnr = metrics?.psnr ?? 0;
+    const ssim = metrics?.ssim ?? 0;
+    const entropy = metrics?.entropy ?? 0;
+    const embeddingTime = metrics?.embedding_time_ms ?? 0;
+    const capacityUsed = metrics?.capacity_used_percent ?? 0;
+
+    if (metricPSNR) {
+      metricPSNR.innerHTML = `${Number.isFinite(psnr) ? psnr.toFixed(2) : '∞'}<span class="pw-metric-unit"> dB</span>`;
+    }
+    if (metricSSIM) {
+      metricSSIM.innerHTML = `${ssim.toFixed(4)}<span class="pw-metric-unit"> </span>`;
+    }
+    if (metricEntropy) {
+      metricEntropy.innerHTML = `${entropy.toFixed(2)}<span class="pw-metric-unit"> </span>`;
+    }
+    if (metricTime) {
+      metricTime.innerHTML = `${embeddingTime.toFixed(2)}<span class="pw-metric-unit"> ms</span>`;
+    }
+    if (metricCapacity) {
+      metricCapacity.innerHTML = `${capacityUsed.toFixed(1)}<span class="pw-metric-unit">%</span>`;
+    }
+  }
+
   function animateMetrics() {
     if (!analyticsSection) return;
     const metrics = [
-      { id: 'pwMetricPSNR', start: 0, end: 42.81, fixed: 2, suffix: ' dB' },
-      { id: 'pwMetricSSIM', start: 0, end: 0.993, fixed: 3, suffix: '' },
-      { id: 'pwMetricEntropy', start: 0, end: 7.91, fixed: 2, suffix: '' },
-      { id: 'pwMetricTime', start: 0, end: 0.42, fixed: 2, suffix: ' s' }
+      { id: 'pwMetricPSNR', start: 0, end: Number(backendUploadDetails?.metrics?.psnr || 0), fixed: 2, suffix: ' dB' },
+      { id: 'pwMetricSSIM', start: 0, end: Number(backendUploadDetails?.metrics?.ssim || 0), fixed: 4, suffix: '' },
+      { id: 'pwMetricEntropy', start: 0, end: Number(backendUploadDetails?.metrics?.entropy || 0), fixed: 2, suffix: '' },
+      { id: 'pwMetricTime', start: 0, end: Number(backendUploadDetails?.metrics?.embedding_time_ms || 0), fixed: 2, suffix: ' ms' }
     ];
 
     metrics.forEach((metric, index) => {
       const el = document.getElementById(metric.id);
       if (!el) return;
       const duration = 900;
+      const safeEnd = Number.isFinite(metric.end) ? metric.end : 0;
       const startTime = performance.now() + index * 120;
       function step(now) {
         const elapsed = now - startTime;
@@ -891,7 +946,7 @@ function initProtectWorkspace() {
           return;
         }
         const progress = Math.min(1, elapsed / duration);
-        const value = metric.start + (metric.end - metric.start) * progress;
+        const value = metric.start + (safeEnd - metric.start) * progress;
         el.textContent = value.toFixed(metric.fixed) + metric.suffix;
         if (progress < 1) requestAnimationFrame(step);
       }
@@ -1042,6 +1097,165 @@ function initProtectWorkspace() {
   setTimeout(syncOriginalPreview, 120);
 }
 
+function initQuantumSecurity() {
+  const generateBtn = document.getElementById('quantumGenerateBtn');
+  const sourceLabel = document.getElementById('quantumSecuritySource');
+  const lengthLabel = document.getElementById('quantumSecurityLength');
+
+  if (!generateBtn || !sourceLabel || !lengthLabel) return;
+
+  const defaultLength = 32;
+  lengthLabel.textContent = defaultLength;
+
+  generateBtn.addEventListener('click', async () => {
+    sourceLabel.textContent = 'Generating...';
+    try {
+      const response = await fetch('/qrng/key', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ length: defaultLength }),
+      });
+      const body = await response.json();
+      if (!response.ok || !body.success) {
+        throw new Error(body.error || 'Key generation failed.');
+      }
+      sourceLabel.textContent = body.source === 'quantum_simulator' ? 'Quantum Simulator' : 'Secure Fallback';
+      lengthLabel.textContent = body.key_length || defaultLength;
+    } catch (error) {
+      sourceLabel.textContent = error.message || 'Unavailable';
+    }
+  });
+}
+
+function initCertificateWorkflow() {
+  const button = document.getElementById('generateCertificateBtn');
+  const status = document.getElementById('certificateStatus');
+  const verificationId = document.getElementById('certificateVerificationId');
+  const details = document.getElementById('certificateDetails');
+  const viewLink = document.getElementById('viewCertificateLink');
+
+  if (!button || !status || !verificationId || !details || !viewLink) return;
+
+  button.addEventListener('click', async () => {
+    const protectedFilename = window.__quantummarkProtectedFilename;
+    const watermark = document.getElementById('pwTextInput')?.value?.trim() || 'QuantumMark Test 123';
+    if (!protectedFilename) {
+      status.textContent = 'Protect an image first.';
+      return;
+    }
+
+    status.textContent = 'Generating certificate...';
+    try {
+      const response = await fetch('/certificate/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ protected_filename: protectedFilename, watermark }),
+      });
+      const body = await response.json();
+      if (!response.ok || !body.success) {
+        throw new Error(body.error || 'Certificate generation failed.');
+      }
+      verificationId.textContent = body.verification_id || '-';
+      status.textContent = 'Certificate generated';
+      details.hidden = false;
+      details.innerHTML = `
+        <strong>Certificate ID:</strong> ${body.certificate_id}<br/>
+        <strong>Verification ID:</strong> ${body.verification_id}<br/>
+        <strong>Algorithm:</strong> ${body.certificate.algorithm}<br/>
+        <strong>PSNR:</strong> ${body.certificate.psnr?.toFixed(2) || '-'}<br/>
+        <strong>SSIM:</strong> ${body.certificate.ssim?.toFixed(4) || '-'}<br/>
+        <strong>Entropy:</strong> ${body.certificate.entropy?.toFixed(2) || '-'}
+      `;
+      viewLink.hidden = false;
+      viewLink.href = `/verify.html?id=${body.verification_id}`;
+      viewLink.textContent = 'View Verification Page';
+    } catch (error) {
+      status.textContent = error.message || 'Unable to generate certificate.';
+    }
+  });
+}
+
+function initAttackLab() {
+  const attackSelect = document.getElementById('attackSelect');
+  const attackApplyBtn = document.getElementById('attackApplyBtn');
+  const attackTestBtn = document.getElementById('attackTestBtn');
+  const attackStatus = document.getElementById('attackStatus');
+  const attackRecovery = document.getElementById('attackRecovery');
+  const attackVerification = document.getElementById('attackVerification');
+  const attackPSNR = document.getElementById('attackPSNR');
+  const attackSSIM = document.getElementById('attackSSIM');
+
+  if (!attackSelect || !attackApplyBtn || !attackTestBtn) return;
+
+  function getProtectedFilename() {
+    return window.__quantummarkProtectedFilename || null;
+  }
+
+  function setStatus(message) {
+    if (attackStatus) attackStatus.textContent = message;
+  }
+
+  function setResult(payload) {
+    if (attackRecovery) attackRecovery.textContent = payload?.status || 'Not tested';
+    if (attackVerification) attackVerification.textContent = payload?.verified ? 'Verified ✅' : 'Not verified';
+    if (attackPSNR) attackPSNR.textContent = payload?.metrics?.psnr != null ? Number(payload.metrics.psnr).toFixed(2) : '-';
+    if (attackSSIM) attackSSIM.textContent = payload?.metrics?.ssim != null ? Number(payload.metrics.ssim).toFixed(4) : '-';
+  }
+
+  attackApplyBtn.addEventListener('click', async () => {
+    const filename = getProtectedFilename();
+    if (!filename) {
+      setStatus('Protect an image first to create an attacked copy.');
+      return;
+    }
+
+    setStatus('Applying attack...');
+    try {
+      const response = await fetch('/attacks/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename, attack: attackSelect.value }),
+      });
+      const body = await response.json();
+      if (!response.ok || !body.success) {
+        throw new Error(body.error || 'Attack could not be applied.');
+      }
+      setStatus(`Applied ${body.attack}`);
+      setResult({ status: 'created', verified: false, metrics: {} });
+    } catch (error) {
+      setStatus(error.message || 'Failed to apply attack.');
+    }
+  });
+
+  attackTestBtn.addEventListener('click', async () => {
+    const filename = getProtectedFilename();
+    if (!filename) {
+      setStatus('Protect an image first to run the robustness test.');
+      return;
+    }
+
+    setStatus('Running robustness test...');
+    try {
+      const response = await fetch('/attacks/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filename,
+          watermark: 'QuantumMark Test 123',
+          attack: attackSelect.value,
+        }),
+      });
+      const body = await response.json();
+      if (!response.ok || !body.success) {
+        throw new Error(body.error || 'Robustness test failed.');
+      }
+      setStatus(`Tested ${body.attack}`);
+      setResult(body);
+    } catch (error) {
+      setStatus(error.message || 'Unable to run robustness test.');
+    }
+  });
+}
 
 /* ============================================================
    5. Activity Tabs — visual tab switching (UI only)

@@ -25,11 +25,17 @@ def create_app():
     from .routes.watermark import watermark_bp
     from .routes.verify import verify_bp
     from .routes.attacks import attacks_bp
+    from .routes.certificate import certificate_bp
+    from .routes.metrics import metrics_bp
+    from .routes.qrng import qrng_bp
 
     app.register_blueprint(upload_bp)
     app.register_blueprint(watermark_bp)
     app.register_blueprint(verify_bp)
     app.register_blueprint(attacks_bp)
+    app.register_blueprint(metrics_bp)
+    app.register_blueprint(qrng_bp)
+    app.register_blueprint(certificate_bp)
 
     @app.route("/", methods=["GET"])
     def index():
@@ -41,8 +47,11 @@ def create_app():
 
     @app.route('/processed/<path:filename>', methods=['GET'])
     def processed_file(filename):
-        safe_name = os.path.basename(filename)
         processed_dir = os.path.join(base, 'processed')
+        safe_name = os.path.normpath(filename)
+        if safe_name in {'.', '..'} or safe_name.startswith('..'):
+            return jsonify({'error': 'Invalid processed file path.'}), 400
+
         processed_path = os.path.join(processed_dir, safe_name)
         if not os.path.isfile(processed_path):
             return jsonify({'error': 'Processed file not found.'}), 404

@@ -505,7 +505,7 @@
                     <span class="pw-metric-value" id="pwMetricTime" data-final="0.42">0<span class="pw-metric-unit"> s</span></span>
                   </div>
                   <div class="pw-metric-card">
-                    <span class="pw-metric-label">Security Level</span>
+                    <span class="pw-metric-label">Capacity Used</span>
                     <span class="pw-metric-value pw-security-high" id="pwMetricSecurity">HIGH</span>
                   </div>
                   <div class="pw-metric-card">
@@ -642,6 +642,120 @@
                 Watermark Successfully Embedded
               </div>
 
+            </section>
+
+            <!-- Attack Lab Card -->
+            <section class="dash-card reveal" id="attackLab" aria-label="Attack Lab">
+              <div class="card-header">
+                <div class="card-title-row">
+                  <div class="card-icon-wrap">
+                    <i data-lucide="flask-conical" aria-hidden="true"></i>
+                  </div>
+                  <div>
+                    <h2 class="card-title">Attack Lab</h2>
+                    <p class="card-subtitle">Apply common image attacks and test watermark robustness</p>
+                  </div>
+                </div>
+              </div>
+              <div class="pw-verification-grid">
+                <div class="pw-verification-card">
+                  <span class="pw-verification-label">Attack</span>
+                  <select id="attackSelect" class="pw-text-input">
+                    <option value="jpeg_compression">JPEG Compression</option>
+                    <option value="gaussian_noise">Gaussian Noise</option>
+                    <option value="rotation">Rotation</option>
+                    <option value="crop">Crop</option>
+                    <option value="blur">Blur</option>
+                  </select>
+                </div>
+                <div class="pw-verification-card">
+                  <span class="pw-verification-label">Status</span>
+                  <p id="attackStatus">Select an attack to begin.</p>
+                </div>
+              </div>
+              <div class="pw-verification-actions">
+                <div class="pw-verification-buttons">
+                  <button type="button" class="btn btn-primary btn-sm" id="attackApplyBtn">Apply Attack</button>
+                  <button type="button" class="btn btn-ghost btn-sm" id="attackTestBtn">Run Robustness Test</button>
+                </div>
+              </div>
+              <div class="pw-verification-grid">
+                <div class="pw-verification-card">
+                  <span class="pw-verification-label">Watermark Recovery</span>
+                  <p id="attackRecovery">Not tested</p>
+                </div>
+                <div class="pw-verification-card">
+                  <span class="pw-verification-label">Verification</span>
+                  <p id="attackVerification">Not verified</p>
+                </div>
+              </div>
+              <div class="pw-verification-grid">
+                <div class="pw-verification-card">
+                  <span class="pw-verification-label">PSNR</span>
+                  <p id="attackPSNR">-</p>
+                </div>
+                <div class="pw-verification-card">
+                  <span class="pw-verification-label">SSIM</span>
+                  <p id="attackSSIM">-</p>
+                </div>
+              </div>
+            </section>
+
+            <!-- Quantum Security Card -->
+            <section class="dash-card reveal" id="quantumSecurityCard" aria-label="Quantum Security">
+              <div class="card-header">
+                <div class="card-title-row">
+                  <div class="card-icon-wrap">
+                    <i data-lucide="cpu" aria-hidden="true"></i>
+                  </div>
+                  <div>
+                    <h2 class="card-title">Quantum Security</h2>
+                    <p class="card-subtitle">Optional local security key generation</p>
+                  </div>
+                </div>
+              </div>
+              <div class="pw-verification-grid">
+                <div class="pw-verification-card">
+                  <span class="pw-verification-label">Source</span>
+                  <p id="quantumSecuritySource">Pending</p>
+                </div>
+                <div class="pw-verification-card">
+                  <span class="pw-verification-label">Key Length</span>
+                  <p id="quantumSecurityLength">32</p>
+                </div>
+              </div>
+              <div class="pw-verification-actions">
+                <button type="button" class="btn btn-primary btn-sm" id="quantumGenerateBtn">Generate Key</button>
+              </div>
+            </section>
+
+            <section class="dash-card reveal" id="certificateCard" aria-label="Ownership Certificate">
+              <div class="card-header">
+                <div class="card-title-row">
+                  <div class="card-icon-wrap">
+                    <i data-lucide="file-badge-2" aria-hidden="true"></i>
+                  </div>
+                  <div>
+                    <h2 class="card-title">Ownership Certificate</h2>
+                    <p class="card-subtitle">Generate a certificate and QR verification code</p>
+                  </div>
+                </div>
+              </div>
+              <div class="pw-verification-grid">
+                <div class="pw-verification-card">
+                  <span class="pw-verification-label">Status</span>
+                  <p id="certificateStatus">No certificate generated yet.</p>
+                </div>
+                <div class="pw-verification-card">
+                  <span class="pw-verification-label">Verification ID</span>
+                  <p id="certificateVerificationId">-</p>
+                </div>
+              </div>
+              <div class="pw-verification-actions">
+                <button type="button" class="btn btn-primary btn-sm" id="generateCertificateBtn">Generate Ownership Certificate</button>
+                <a id="viewCertificateLink" class="btn btn-ghost btn-sm" href="#" hidden>View Certificate</a>
+              </div>
+              <div id="certificateDetails" class="pw-verification-card" hidden></div>
             </section>
 
             <!-- Processing History Card -->
