@@ -60,7 +60,9 @@ def create_app():
     return app
 
 
+application = create_app()
+
+
 if __name__ == "__main__":
     # Run with: python -m backend.app
-    application = create_app()
     application.run(host="0.0.0.0", port=5000, debug=True)
