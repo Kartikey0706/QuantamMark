@@ -952,6 +952,10 @@ button {
   position: relative; /* contain overlay */
 }
 
+.protect-workspace > .dash-card {
+  margin-top: var(--space-lg);
+}
+
 /* Top section: Original Image */
 .pw-top-section {
   padding: var(--space-xl);
@@ -1302,6 +1306,76 @@ button {
 .pw-algorithm-item span {
   font-weight: 700;
   color: var(--text-primary);
+}
+
+/* Verification-style cards used by Attack Lab / Quantum Security / Certificates */
+.pw-verification-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.pw-verification-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-md);
+}
+
+.pw-verification-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  min-height: 100%;
+  padding: var(--space-lg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.pw-verification-card p {
+  margin: 0;
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.25;
+  word-break: break-word;
+}
+
+.pw-verification-label {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.pw-verification-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: 0 var(--space-xl) var(--space-lg);
+}
+
+.pw-verification-buttons {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.pw-verification-actions .pw-text-input {
+  width: 100%;
+}
+
+#certificateDetails.pw-verification-card {
+  margin: 0 var(--space-xl) var(--space-xl);
+}
+
+#certificateDetails.pw-verification-card strong {
+  color: var(--text-primary);
+}
+
+#certificateDetails.pw-verification-card[hidden] {
+  display: none;
 }
 
 /* Quantum key section */
