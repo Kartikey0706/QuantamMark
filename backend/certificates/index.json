@@ -66,5 +66,39 @@
     "embedding_time": 0.0,
     "security_source": "secure_random_fallback",
     "verified": true
+  },
+  "QM-1454ECBA": {
+    "certificate_id": "QM-77E87412",
+    "verification_id": "QM-1454ECBA",
+    "timestamp": "2026-08-08T16:38:06.244422+00:00",
+    "original_filename": "protected_certificate_20260808163806231673.png",
+    "protected_filename": "protected_certificate_20260808163806231673.png",
+    "watermark": "QuantumMark Certificate Test",
+    "algorithm": "LSB",
+    "watermark_length": 28,
+    "embedded_bits": 224,
+    "psnr": Infinity,
+    "ssim": 1.0,
+    "entropy": 0.27719948165752545,
+    "embedding_time": 0.0,
+    "security_source": "secure_random_fallback",
+    "verified": true
+  },
+  "QM-8BE8805C": {
+    "certificate_id": "QM-7B90F2E1",
+    "verification_id": "QM-8BE8805C",
+    "timestamp": "2026-08-08T16:38:06.281666+00:00",
+    "original_filename": "protected_certificate_20260808163806231673.png",
+    "protected_filename": "protected_certificate_20260808163806231673.png",
+    "watermark": "QuantumMark Certificate Test",
+    "algorithm": "LSB",
+    "watermark_length": 28,
+    "embedded_bits": 224,
+    "psnr": Infinity,
+    "ssim": 1.0,
+    "entropy": 0.27719948165752545,
+    "embedding_time": 0.0,
+    "security_source": "secure_random_fallback",
+    "verified": true
   }
 }
